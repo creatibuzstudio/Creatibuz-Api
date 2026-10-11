@@ -1,0 +1,47 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreateBannerDto } from './dto/create-banner.dto';
+import { UpdateBannerDto } from './dto/update-banner.dto';
+import { Banner } from './entities/banner.entity';
+
+@Injectable()
+export class BannerService {
+  constructor(
+    @InjectRepository(Banner)
+    private bannerRepository: Repository<Banner>,
+  ) {}
+
+  async create(createBannerDto: CreateBannerDto): Promise<Banner> {
+    const banner = this.bannerRepository.create(createBannerDto);
+    return await this.bannerRepository.save(banner);
+  }
+
+  async findAll(): Promise<Banner[]> {
+    return await this.bannerRepository.find({
+      order: {
+        order: 'ASC',
+        createdAt: 'DESC',
+      }
+    });
+  }
+
+  async findOne(id: string): Promise<Banner> {
+    const banner = await this.bannerRepository.findOne({ where: { id } });
+    if (!banner) {
+      throw new NotFoundException(`Banner with ID ${id} not found`);
+    }
+    return banner;
+  }
+
+  async update(id: string, updateBannerDto: UpdateBannerDto): Promise<Banner> {
+    const banner = await this.findOne(id);
+    Object.assign(banner, updateBannerDto);
+    return await this.bannerRepository.save(banner);
+  }
+
+  async remove(id: string): Promise<void> {
+    const banner = await this.findOne(id);
+    await this.bannerRepository.remove(banner);
+  }
+}
