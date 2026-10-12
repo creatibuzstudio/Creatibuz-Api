@@ -3,12 +3,14 @@ import type { VercelRequest, VercelResponse } from '../src/vercel-types';
 import { getApp } from '../src/get-app';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // 🔥 FORCE CORS HEADERS (this is the fix)
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // 🔥 DYNAMIC CORS HEADERS WITH CREDENTIALS SUPPORT
+  const origin = (req.headers.origin as string) || '*';
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'Content-Type, Authorization',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization',
   );
 
   // Preflight

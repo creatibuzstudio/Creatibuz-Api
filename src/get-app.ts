@@ -9,8 +9,8 @@ export async function getApp() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
     app.enableCors({
-      origin: true, // ✅ সব domain allow
-      credentials: false, // optional: cookie/credential নেই
+      origin: true,
+      credentials: true,
     });
 
     await app.init();
