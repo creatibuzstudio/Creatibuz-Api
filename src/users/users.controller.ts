@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, UseGuards, Request } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -28,6 +28,18 @@ export class UsersController {
       statusCode: HttpStatus.OK,
       message: 'Users retrieved successfully',
       data,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('get/single-user')
+  async getSingleUser(@Request() req) {
+    const data = await this.usersService.findOne(req.user.userId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'User retrieved successfully',
+      data,
+      ...data,
     };
   }
 

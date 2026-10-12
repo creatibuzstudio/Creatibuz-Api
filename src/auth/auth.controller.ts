@@ -14,7 +14,25 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto) {
-    const user = await this.authService.validateUser(loginDto.email, loginDto.password);
+    const email = loginDto.email || loginDto.username;
+    if (!email) {
+      throw new UnauthorizedException('Email or username is required');
+    }
+    const user = await this.authService.validateUser(email, loginDto.password);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    return this.authService.login(user);
+  }
+
+  @Post('admin-login')
+  @HttpCode(HttpStatus.OK)
+  async adminLogin(@Body() loginDto: LoginDto) {
+    const email = loginDto.email || loginDto.username;
+    if (!email) {
+      throw new UnauthorizedException('Email or username is required');
+    }
+    const user = await this.authService.validateUser(email, loginDto.password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
