@@ -22,7 +22,7 @@ __decorate([
 ], CreateBlogDto.prototype, "title", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
 ], CreateBlogDto.prototype, "slug", void 0);
@@ -38,6 +38,11 @@ __decorate([
 ], CreateBlogDto.prototype, "excerpt", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateBlogDto.prototype, "shortDescription", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateBlogDto.prototype, "content", void 0);
@@ -47,4 +52,41 @@ __decorate([
     (0, class_validator_1.MaxLength)(150),
     __metadata("design:type", String)
 ], CreateBlogDto.prototype, "author", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.MaxLength)(255),
+    __metadata("design:type", String)
+], CreateBlogDto.prototype, "seoTitle", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateBlogDto.prototype, "seoDescription", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateBlogDto.prototype, "seoKeywords", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateBlogDto.prototype, "keywords", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.MaxLength)(255),
+    __metadata("design:type", String)
+], CreateBlogDto.prototype, "metaTitle", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateBlogDto.prototype, "metaDescription", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateBlogDto.prototype, "metaKeywords", void 0);
 //# sourceMappingURL=create-blog.dto.js.map

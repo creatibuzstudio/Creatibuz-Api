@@ -27,6 +27,9 @@ let BlogController = class BlogController {
     findAll() {
         return this.blogService.findAll();
     }
+    findBySlug(slug) {
+        return this.blogService.findBySlug(slug);
+    }
     findOne(id) {
         return this.blogService.findOne(id);
     }
@@ -51,6 +54,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], BlogController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('slug/:slug'),
+    __param(0, (0, common_1.Param)('slug')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BlogController.prototype, "findBySlug", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

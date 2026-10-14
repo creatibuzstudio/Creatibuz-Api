@@ -21,8 +21,52 @@ let BlogService = class BlogService {
     constructor(blogRepository) {
         this.blogRepository = blogRepository;
     }
+    generateSlug(text) {
+        return text
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/[\s_-]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+    normalizeMetadata(dto) {
+        const payload = { ...dto };
+        if (payload.shortDescription && !payload.excerpt) {
+            payload.excerpt = payload.shortDescription;
+        }
+        else if (payload.excerpt && !payload.shortDescription) {
+            payload.shortDescription = payload.excerpt;
+        }
+        const titleVal = payload.seoTitle || payload.metaTitle;
+        if (titleVal) {
+            payload.seoTitle = payload.seoTitle || titleVal;
+            payload.metaTitle = payload.metaTitle || titleVal;
+        }
+        const descVal = payload.seoDescription || payload.metaDescription;
+        if (descVal) {
+            payload.seoDescription = payload.seoDescription || descVal;
+            payload.metaDescription = payload.metaDescription || descVal;
+        }
+        const keywordsVal = payload.seoKeywords || payload.keywords || payload.metaKeywords;
+        if (keywordsVal) {
+            payload.seoKeywords = payload.seoKeywords || keywordsVal;
+            payload.keywords = payload.keywords || keywordsVal;
+            payload.metaKeywords = payload.metaKeywords || keywordsVal;
+        }
+        return payload;
+    }
     async create(createBlogDto) {
-        const blog = this.blogRepository.create(createBlogDto);
+        const payload = this.normalizeMetadata(createBlogDto);
+        if (!payload.slug) {
+            const baseSlug = this.generateSlug(payload.title) || 'blog-post';
+            let slug = baseSlug;
+            const existing = await this.blogRepository.findOne({ where: { slug } });
+            if (existing) {
+                slug = `${baseSlug}-${Date.now().toString(36)}`;
+            }
+            payload.slug = slug;
+        }
+        const blog = this.blogRepository.create(payload);
         return await this.blogRepository.save(blog);
     }
     async findAll() {
@@ -32,16 +76,31 @@ let BlogService = class BlogService {
             },
         });
     }
-    async findOne(id) {
-        const blog = await this.blogRepository.findOne({ where: { id } });
+    async findBySlug(slug) {
+        const blog = await this.blogRepository.findOne({ where: { slug } });
         if (!blog) {
-            throw new common_1.NotFoundException(`Blog with ID ${id} not found`);
+            throw new common_1.NotFoundException(`Blog with slug '${slug}' not found`);
+        }
+        return blog;
+    }
+    async findOne(idOrSlug) {
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idOrSlug);
+        let blog = null;
+        if (isUuid) {
+            blog = await this.blogRepository.findOne({ where: { id: idOrSlug } });
+        }
+        if (!blog) {
+            blog = await this.blogRepository.findOne({ where: { slug: idOrSlug } });
+        }
+        if (!blog) {
+            throw new common_1.NotFoundException(`Blog with ID or Slug '${idOrSlug}' not found`);
         }
         return blog;
     }
     async update(id, updateBlogDto) {
         const blog = await this.findOne(id);
-        const updated = Object.assign(blog, updateBlogDto);
+        const payload = this.normalizeMetadata(updateBlogDto);
+        const updated = Object.assign(blog, payload);
         return await this.blogRepository.save(updated);
     }
     async remove(id) {

@@ -5,9 +5,12 @@ import { Blog } from './entities/blog.entity';
 export declare class BlogService {
     private blogRepository;
     constructor(blogRepository: Repository<Blog>);
+    private generateSlug;
+    private normalizeMetadata;
     create(createBlogDto: CreateBlogDto): Promise<Blog>;
     findAll(): Promise<Blog[]>;
-    findOne(id: string): Promise<Blog>;
+    findBySlug(slug: string): Promise<Blog>;
+    findOne(idOrSlug: string): Promise<Blog>;
     update(id: string, updateBlogDto: UpdateBlogDto): Promise<Blog>;
     remove(id: string): Promise<void>;
 }

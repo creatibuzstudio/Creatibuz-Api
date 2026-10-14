@@ -35,6 +35,10 @@ __decorate([
     __metadata("design:type", String)
 ], Blog.prototype, "excerpt", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Blog.prototype, "shortDescription", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'text' }),
     __metadata("design:type", String)
 ], Blog.prototype, "content", void 0);
@@ -42,6 +46,34 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 150, default: 'Admin' }),
     __metadata("design:type", String)
 ], Blog.prototype, "author", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
+    __metadata("design:type", String)
+], Blog.prototype, "seoTitle", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Blog.prototype, "seoDescription", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Blog.prototype, "seoKeywords", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Blog.prototype, "keywords", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
+    __metadata("design:type", String)
+], Blog.prototype, "metaTitle", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Blog.prototype, "metaDescription", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Blog.prototype, "metaKeywords", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

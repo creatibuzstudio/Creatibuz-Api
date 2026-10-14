@@ -17,6 +17,11 @@ export class BlogController {
     return this.blogService.findAll();
   }
 
+  @Get('slug/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.blogService.findBySlug(slug);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.blogService.findOne(id);

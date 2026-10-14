@@ -7,9 +7,9 @@ export class CreateBlogDto {
   title: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @MaxLength(255)
-  slug: string;
+  slug?: string;
 
   @IsString()
   @IsOptional()
@@ -20,6 +20,10 @@ export class CreateBlogDto {
   excerpt?: string;
 
   @IsString()
+  @IsOptional()
+  shortDescription?: string;
+
+  @IsString()
   @IsNotEmpty()
   content: string;
 
@@ -27,4 +31,34 @@ export class CreateBlogDto {
   @IsOptional()
   @MaxLength(150)
   author?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  seoTitle?: string;
+
+  @IsString()
+  @IsOptional()
+  seoDescription?: string;
+
+  @IsString()
+  @IsOptional()
+  seoKeywords?: string;
+
+  @IsString()
+  @IsOptional()
+  keywords?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  metaTitle?: string;
+
+  @IsString()
+  @IsOptional()
+  metaDescription?: string;
+
+  @IsString()
+  @IsOptional()
+  metaKeywords?: string;
 }
