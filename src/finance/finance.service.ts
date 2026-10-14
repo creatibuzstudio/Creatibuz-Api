@@ -34,9 +34,11 @@ export class FinanceService {
   // 1. SETTINGS & DYNAMIC DISTRIBUTION ENGINE
   // -------------------------------------------------------------
   async getSettings(): Promise<FinancialSetting & { ceoUser?: any; cooUser?: any }> {
-    let setting = await this.settingRepository.findOne({
+    const settings = await this.settingRepository.find({
       order: { createdAt: 'ASC' },
+      take: 1,
     });
+    let setting = settings[0] || null;
 
     if (!setting) {
       setting = this.settingRepository.create({
@@ -108,9 +110,11 @@ export class FinanceService {
   }
 
   async updateSettings(dto: UpdateSettingsDto): Promise<FinancialSetting> {
-    let setting = await this.settingRepository.findOne({
+    const settings = await this.settingRepository.find({
       order: { createdAt: 'ASC' },
+      take: 1,
     });
+    let setting = settings[0] || null;
 
     if (!setting) {
       setting = this.settingRepository.create(dto);

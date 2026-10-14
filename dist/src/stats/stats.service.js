@@ -114,9 +114,11 @@ let StatsService = class StatsService {
             }
         });
         const totalTreasury = totalInvestorCapital + totalRevenue - totalApprovedExpenses;
-        let setting = await this.settingRepository.findOne({
+        const settings = await this.settingRepository.find({
             order: { createdAt: 'ASC' },
+            take: 1,
         });
+        let setting = settings[0] || null;
         const companyCostPercent = Number(setting?.companyCostPercent || 40);
         const employeePoolPercent = Number(setting?.employeePoolPercent || 30);
         const leadershipPoolPercent = Number(setting?.leadershipPoolPercent || 30);

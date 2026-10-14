@@ -30,9 +30,11 @@ let FinanceService = class FinanceService {
         this.orderRepository = orderRepository;
     }
     async getSettings() {
-        let setting = await this.settingRepository.findOne({
+        const settings = await this.settingRepository.find({
             order: { createdAt: 'ASC' },
+            take: 1,
         });
+        let setting = settings[0] || null;
         if (!setting) {
             setting = this.settingRepository.create({
                 companyCostPercent: 40,
@@ -97,9 +99,11 @@ let FinanceService = class FinanceService {
         };
     }
     async updateSettings(dto) {
-        let setting = await this.settingRepository.findOne({
+        const settings = await this.settingRepository.find({
             order: { createdAt: 'ASC' },
+            take: 1,
         });
+        let setting = settings[0] || null;
         if (!setting) {
             setting = this.settingRepository.create(dto);
         }
