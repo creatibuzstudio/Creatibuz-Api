@@ -42,7 +42,14 @@ export class OrdersService {
       createOrderDto.budget !== undefined
         ? Number(createOrderDto.budget)
         : Math.max(0, subtotal - discount + tax);
-    const advance = Number(createOrderDto.advance || 0);
+    const isPaid =
+      createOrderDto.paymentStatus &&
+      String(createOrderDto.paymentStatus).toLowerCase() === PaymentStatus.PAID;
+
+    let advance = Number(createOrderDto.advance || 0);
+    if (isPaid && advance < budget) {
+      advance = budget;
+    }
 
     const initialPayments =
       Array.isArray(createOrderDto.payments) && createOrderDto.payments.length > 0
@@ -53,9 +60,11 @@ export class OrdersService {
               id: `pmt-${Date.now()}`,
               amount: advance,
               paymentDate: new Date().toISOString().split('T')[0],
-              paymentMethod: 'Initial Advance',
+              paymentMethod: isPaid ? 'Full Payment' : 'Initial Advance',
               receiptNumber: this.generateReceiptNumber(),
-              note: 'Initial payment upon order onboarding',
+              note: isPaid
+                ? 'Full payment received upon order creation'
+                : 'Initial payment upon order onboarding',
               createdAt: new Date().toISOString(),
             },
           ]
@@ -76,6 +85,9 @@ export class OrdersService {
 
     if (createOrderDto.paymentStatus) {
       orderData.paymentStatus = createOrderDto.paymentStatus;
+      if (isPaid) {
+        orderData.advance = Math.max(budget, advance);
+      }
     } else if (advance >= budget && budget > 0) {
       orderData.paymentStatus = PaymentStatus.PAID;
     } else if (advance > 0) {
@@ -200,6 +212,26 @@ export class OrdersService {
 
     if (updateOrderDto.paymentStatus) {
       updateData.paymentStatus = updateOrderDto.paymentStatus;
+      if (String(updateOrderDto.paymentStatus).toLowerCase() === PaymentStatus.PAID) {
+        if (updateData.advance === undefined || Number(updateData.advance) < currentBudget) {
+          updateData.advance = currentBudget;
+        }
+        const existingPayments = Array.isArray(order.payments) ? order.payments : [];
+        const currentPaid = existingPayments.reduce((s, p) => s + Number(p.amount || 0), 0);
+        if (currentPaid < currentBudget) {
+          const settlementAmount = currentBudget - currentPaid;
+          const settlementPayment = {
+            id: `pmt-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+            amount: settlementAmount,
+            paymentDate: new Date().toISOString().split('T')[0],
+            paymentMethod: 'Settlement Payment',
+            receiptNumber: this.generateReceiptNumber(),
+            note: 'Order marked as paid in full',
+            createdAt: new Date().toISOString(),
+          };
+          updateData.payments = [...existingPayments, settlementPayment];
+        }
+      }
     } else if (currentAdvance >= currentBudget && currentBudget > 0) {
       updateData.paymentStatus = PaymentStatus.PAID;
     } else if (currentAdvance > 0) {

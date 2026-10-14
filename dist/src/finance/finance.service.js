@@ -51,13 +51,19 @@ let FinanceService = class FinanceService {
                 where: { id: setting.ceoUserId },
                 relations: { designation: true, department: true },
             });
+            if (ceoUser && ceoUser.role?.toLowerCase() !== 'ceo' && ceoUser.role !== user_entity_1.UserRole.CEO) {
+                ceoUser = null;
+            }
         }
         if (!ceoUser) {
             const allUsers = await this.userRepository.find({
                 relations: { designation: true, department: true },
+                order: { createdAt: 'ASC' },
             });
-            ceoUser = allUsers.find((u) => u.role?.toLowerCase() === 'ceo') || null;
-            if (ceoUser && !setting.ceoUserId) {
+            ceoUser =
+                allUsers.find((u) => u.role?.toLowerCase() === 'ceo' || u.role === user_entity_1.UserRole.CEO) ||
+                    null;
+            if (ceoUser) {
                 setting.ceoUserId = ceoUser.id;
                 await this.settingRepository.save(setting);
             }
@@ -67,13 +73,19 @@ let FinanceService = class FinanceService {
                 where: { id: setting.cooUserId },
                 relations: { designation: true, department: true },
             });
+            if (cooUser && cooUser.role?.toLowerCase() !== 'coo' && cooUser.role !== user_entity_1.UserRole.COO) {
+                cooUser = null;
+            }
         }
         if (!cooUser) {
             const allUsers = await this.userRepository.find({
                 relations: { designation: true, department: true },
+                order: { createdAt: 'ASC' },
             });
-            cooUser = allUsers.find((u) => u.role?.toLowerCase() === 'coo') || null;
-            if (cooUser && !setting.cooUserId) {
+            cooUser =
+                allUsers.find((u) => u.role?.toLowerCase() === 'coo' || u.role === user_entity_1.UserRole.COO) ||
+                    null;
+            if (cooUser) {
                 setting.cooUserId = cooUser.id;
                 await this.settingRepository.save(setting);
             }
@@ -254,11 +266,20 @@ let FinanceService = class FinanceService {
         let totalOrderRevenue = 0;
         let totalOrderInvoiced = 0;
         orders.forEach((o) => {
-            totalOrderRevenue += Number(o.advance || 0);
             const sub = o.subtotal !== undefined ? Number(o.subtotal) : Number(o.budget || 0);
             const disc = Number(o.discount || 0);
             const tx = Number(o.tax || 0);
-            totalOrderInvoiced += Math.max(0, sub - disc + tx);
+            const orderInvoiced = Math.max(0, sub - disc + tx) || Number(o.budget || 0);
+            const adv = Number(o.advance || 0);
+            const pmtSum = Array.isArray(o.payments)
+                ? o.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0)
+                : 0;
+            const pStatus = String(o.paymentStatus || '').toLowerCase();
+            const orderPaid = pStatus === 'paid'
+                ? Math.max(orderInvoiced, adv, pmtSum)
+                : Math.max(adv, pmtSum);
+            totalOrderRevenue += orderPaid;
+            totalOrderInvoiced += orderInvoiced;
         });
         const capitals = await this.capitalRepository.find();
         let totalInvestorCapital = 0;

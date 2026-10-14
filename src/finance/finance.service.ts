@@ -59,13 +59,19 @@ export class FinanceService {
         where: { id: setting.ceoUserId },
         relations: { designation: true, department: true },
       });
+      if (ceoUser && ceoUser.role?.toLowerCase() !== 'ceo' && ceoUser.role !== UserRole.CEO) {
+        ceoUser = null;
+      }
     }
     if (!ceoUser) {
       const allUsers = await this.userRepository.find({
         relations: { designation: true, department: true },
+        order: { createdAt: 'ASC' },
       });
-      ceoUser = allUsers.find((u) => u.role?.toLowerCase() === 'ceo') || null;
-      if (ceoUser && !setting.ceoUserId) {
+      ceoUser =
+        allUsers.find((u) => u.role?.toLowerCase() === 'ceo' || u.role === UserRole.CEO) ||
+        null;
+      if (ceoUser) {
         setting.ceoUserId = ceoUser.id;
         await this.settingRepository.save(setting);
       }
@@ -76,13 +82,19 @@ export class FinanceService {
         where: { id: setting.cooUserId },
         relations: { designation: true, department: true },
       });
+      if (cooUser && cooUser.role?.toLowerCase() !== 'coo' && cooUser.role !== UserRole.COO) {
+        cooUser = null;
+      }
     }
     if (!cooUser) {
       const allUsers = await this.userRepository.find({
         relations: { designation: true, department: true },
+        order: { createdAt: 'ASC' },
       });
-      cooUser = allUsers.find((u) => u.role?.toLowerCase() === 'coo') || null;
-      if (cooUser && !setting.cooUserId) {
+      cooUser =
+        allUsers.find((u) => u.role?.toLowerCase() === 'coo' || u.role === UserRole.COO) ||
+        null;
+      if (cooUser) {
         setting.cooUserId = cooUser.id;
         await this.settingRepository.save(setting);
       }
@@ -315,11 +327,25 @@ export class FinanceService {
     let totalOrderInvoiced = 0;
 
     orders.forEach((o) => {
-      totalOrderRevenue += Number(o.advance || 0);
       const sub = o.subtotal !== undefined ? Number(o.subtotal) : Number(o.budget || 0);
       const disc = Number(o.discount || 0);
       const tx = Number(o.tax || 0);
-      totalOrderInvoiced += Math.max(0, sub - disc + tx);
+      const orderInvoiced = Math.max(0, sub - disc + tx) || Number(o.budget || 0);
+      const adv = Number(o.advance || 0);
+      const pmtSum = Array.isArray(o.payments)
+        ? o.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0)
+        : 0;
+      const pStatus = String(o.paymentStatus || '').toLowerCase();
+
+      // If order is paid, the full invoiced amount is collected into totalOrderRevenue.
+      // Otherwise, any advance or recorded payments are added.
+      const orderPaid =
+        pStatus === 'paid'
+          ? Math.max(orderInvoiced, adv, pmtSum)
+          : Math.max(adv, pmtSum);
+
+      totalOrderRevenue += orderPaid;
+      totalOrderInvoiced += orderInvoiced;
     });
 
     // 2. Total Investor Capital

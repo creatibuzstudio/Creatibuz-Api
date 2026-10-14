@@ -60,11 +60,20 @@ let StatsService = class StatsService {
         let onboardOrders = 0;
         let deliveryOrders = 0;
         orders.forEach((o) => {
-            totalRevenue += Number(o.advance || 0);
             const sub = o.subtotal !== undefined ? Number(o.subtotal) : Number(o.budget || 0);
             const disc = Number(o.discount || 0);
             const tx = Number(o.tax || 0);
-            totalInvoiced += Math.max(0, sub - disc + tx);
+            const orderInvoiced = Math.max(0, sub - disc + tx) || Number(o.budget || 0);
+            const adv = Number(o.advance || 0);
+            const pmtSum = Array.isArray(o.payments)
+                ? o.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0)
+                : 0;
+            const pStatus = String(o.paymentStatus || '').toLowerCase();
+            const orderPaid = pStatus === 'paid'
+                ? Math.max(orderInvoiced, adv, pmtSum)
+                : Math.max(adv, pmtSum);
+            totalRevenue += orderPaid;
+            totalInvoiced += orderInvoiced;
             const st = String(o.status || '').toLowerCase();
             if (st === order_entity_1.OrderStatus.DELIVERED || st === 'delivered') {
                 completedOrders += 1;
@@ -142,11 +151,20 @@ let StatsService = class StatsService {
                 const oKey = `${od.getFullYear()}-${String(od.getMonth() + 1).padStart(2, '0')}`;
                 const target = last6Months.find((m) => m.monthKey === oKey);
                 if (target) {
-                    target.revenue += Number(o.advance || 0);
                     const sub = o.subtotal !== undefined ? Number(o.subtotal) : Number(o.budget || 0);
                     const disc = Number(o.discount || 0);
                     const tx = Number(o.tax || 0);
-                    target.invoiced += Math.max(0, sub - disc + tx);
+                    const orderInvoiced = Math.max(0, sub - disc + tx) || Number(o.budget || 0);
+                    const adv = Number(o.advance || 0);
+                    const pmtSum = Array.isArray(o.payments)
+                        ? o.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0)
+                        : 0;
+                    const pStatus = String(o.paymentStatus || '').toLowerCase();
+                    const orderPaid = pStatus === 'paid'
+                        ? Math.max(orderInvoiced, adv, pmtSum)
+                        : Math.max(adv, pmtSum);
+                    target.revenue += orderPaid;
+                    target.invoiced += orderInvoiced;
                     target.orders += 1;
                 }
             }
@@ -183,20 +201,34 @@ let StatsService = class StatsService {
             { name: 'CEO Leadership Share', percent: ceoPercent, amount: Number(ceoAmount.toFixed(2)), color: '#F59E0B' },
             { name: 'COO Leadership Share', percent: cooPercent, amount: Number(cooAmount.toFixed(2)), color: '#8B5CF6' },
         ];
-        const recentOrders = orders.slice(0, 6).map((o) => ({
-            id: o.id,
-            projectName: o.projectName,
-            clientName: o.clientName || o.client?.name || 'Valued Client',
-            clientEmail: o.clientEmail || o.client?.email || 'N/A',
-            clientPicture: o.client?.picture || null,
-            budget: Number(o.subtotal || o.budget || 0),
-            advance: Number(o.advance || 0),
-            due: Math.max(0, Number(o.subtotal || o.budget || 0) - Number(o.advance || 0)),
-            status: o.status,
-            paymentStatus: o.paymentStatus,
-            invoiceNumber: o.invoiceNumber || 'INV-DRAFT',
-            createdAt: o.createdAt,
-        }));
+        const recentOrders = orders.slice(0, 6).map((o) => {
+            const sub = o.subtotal !== undefined ? Number(o.subtotal) : Number(o.budget || 0);
+            const disc = Number(o.discount || 0);
+            const tx = Number(o.tax || 0);
+            const orderInvoiced = Math.max(0, sub - disc + tx) || Number(o.budget || 0);
+            const adv = Number(o.advance || 0);
+            const pmtSum = Array.isArray(o.payments)
+                ? o.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0)
+                : 0;
+            const pStatus = String(o.paymentStatus || '').toLowerCase();
+            const orderPaid = pStatus === 'paid'
+                ? Math.max(orderInvoiced, adv, pmtSum)
+                : Math.max(adv, pmtSum);
+            return {
+                id: o.id,
+                projectName: o.projectName,
+                clientName: o.clientName || o.client?.name || 'Valued Client',
+                clientEmail: o.clientEmail || o.client?.email || 'N/A',
+                clientPicture: o.client?.picture || null,
+                budget: orderInvoiced,
+                advance: orderPaid,
+                due: Math.max(0, orderInvoiced - orderPaid),
+                status: o.status,
+                paymentStatus: o.paymentStatus,
+                invoiceNumber: o.invoiceNumber || 'INV-DRAFT',
+                createdAt: o.createdAt,
+            };
+        });
         return {
             projectDeliveries: Math.max(projectDeliveries, 50),
             inHouseExperts: Math.max(inHouseExperts, 15),
