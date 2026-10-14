@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { Casestudy } from '../casestudies/entities/casestudy.entity';
-import { User } from '../users/entities/user.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 import { Partner } from '../partners/entities/partner.entity';
 import { Order, OrderStatus } from '../orders/entities/order.entity';
 import { InvestorCapital } from '../finance/entities/investor-capital.entity';
@@ -100,6 +100,37 @@ export declare class StatsService {
             paymentStatus: import("../orders/entities/order.entity").PaymentStatus;
             invoiceNumber: string;
             createdAt: Date;
+        }[];
+        upcomingBirthdays: {
+            id: string;
+            name: string;
+            email: string;
+            picture: string;
+            role: UserRole;
+            department: string;
+            designation: string;
+            dateOfBirth: string;
+            formattedDate: string;
+            daysRemaining: number;
+            statusText: string;
+            isToday: boolean;
+        }[];
+        newJoiners: {
+            id: string;
+            name: string;
+            email: string;
+            picture: string;
+            role: UserRole;
+            department: string;
+            designation: string;
+            joiningDate: string | Date;
+            createdAt: Date;
+            formattedDate: string;
+            exactTime: string;
+            fullDateTime: string;
+            daysAgo: number;
+            relativeTime: string;
+            isNew: boolean;
         }[];
     }>;
 }

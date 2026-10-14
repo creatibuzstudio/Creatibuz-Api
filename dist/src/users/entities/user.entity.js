@@ -78,6 +78,14 @@ __decorate([
     __metadata("design:type", Boolean)
 ], User.prototype, "isPreview", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 30, nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "dateOfBirth", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 30, nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "joiningDate", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], User.prototype, "createdAt", void 0);

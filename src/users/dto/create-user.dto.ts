@@ -45,4 +45,12 @@ export class CreateUserDto {
   @IsOptional()
   @IsBoolean()
   isPreview?: boolean;
+
+  @IsOptional()
+  @IsString()
+  dateOfBirth?: string;
+
+  @IsOptional()
+  @IsString()
+  joiningDate?: string;
 }

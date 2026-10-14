@@ -84,6 +84,37 @@ export declare class StatsController {
             invoiceNumber: string;
             createdAt: Date;
         }[];
+        upcomingBirthdays: {
+            id: string;
+            name: string;
+            email: string;
+            picture: string;
+            role: import("../users/entities/user.entity").UserRole;
+            department: string;
+            designation: string;
+            dateOfBirth: string;
+            formattedDate: string;
+            daysRemaining: number;
+            statusText: string;
+            isToday: boolean;
+        }[];
+        newJoiners: {
+            id: string;
+            name: string;
+            email: string;
+            picture: string;
+            role: import("../users/entities/user.entity").UserRole;
+            department: string;
+            designation: string;
+            joiningDate: string | Date;
+            createdAt: Date;
+            formattedDate: string;
+            exactTime: string;
+            fullDateTime: string;
+            daysAgo: number;
+            relativeTime: string;
+            isNew: boolean;
+        }[];
     }>;
     getDashboardStats(): Promise<{
         projectDeliveries: number;
@@ -167,6 +198,37 @@ export declare class StatsController {
             invoiceNumber: string;
             createdAt: Date;
         }[];
+        upcomingBirthdays: {
+            id: string;
+            name: string;
+            email: string;
+            picture: string;
+            role: import("../users/entities/user.entity").UserRole;
+            department: string;
+            designation: string;
+            dateOfBirth: string;
+            formattedDate: string;
+            daysRemaining: number;
+            statusText: string;
+            isToday: boolean;
+        }[];
+        newJoiners: {
+            id: string;
+            name: string;
+            email: string;
+            picture: string;
+            role: import("../users/entities/user.entity").UserRole;
+            department: string;
+            designation: string;
+            joiningDate: string | Date;
+            createdAt: Date;
+            formattedDate: string;
+            exactTime: string;
+            fullDateTime: string;
+            daysAgo: number;
+            relativeTime: string;
+            isNew: boolean;
+        }[];
     }>;
     getOverviewStats(): Promise<{
         projectDeliveries: number;
@@ -249,6 +311,37 @@ export declare class StatsController {
             paymentStatus: import("../orders/entities/order.entity").PaymentStatus;
             invoiceNumber: string;
             createdAt: Date;
+        }[];
+        upcomingBirthdays: {
+            id: string;
+            name: string;
+            email: string;
+            picture: string;
+            role: import("../users/entities/user.entity").UserRole;
+            department: string;
+            designation: string;
+            dateOfBirth: string;
+            formattedDate: string;
+            daysRemaining: number;
+            statusText: string;
+            isToday: boolean;
+        }[];
+        newJoiners: {
+            id: string;
+            name: string;
+            email: string;
+            picture: string;
+            role: import("../users/entities/user.entity").UserRole;
+            department: string;
+            designation: string;
+            joiningDate: string | Date;
+            createdAt: Date;
+            formattedDate: string;
+            exactTime: string;
+            fullDateTime: string;
+            daysAgo: number;
+            relativeTime: string;
+            isNew: boolean;
         }[];
     }>;
 }

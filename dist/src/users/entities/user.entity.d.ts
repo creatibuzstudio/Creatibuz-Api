@@ -25,6 +25,8 @@ export declare class User {
     designation: Designation;
     order: number;
     isPreview: boolean;
+    dateOfBirth: string;
+    joiningDate: string;
     createdAt: Date;
     updatedAt: Date;
 }

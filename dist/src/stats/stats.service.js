@@ -231,6 +231,116 @@ let StatsService = class StatsService {
                 createdAt: o.createdAt,
             };
         });
+        const nowTime = new Date();
+        const currentYear = nowTime.getFullYear();
+        const todayStart = new Date(currentYear, nowTime.getMonth(), nowTime.getDate()).getTime();
+        const teamMembers = allUsers.filter((u) => u.role !== user_entity_1.UserRole.CLIENT);
+        const monthShortNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const upcomingBirthdays = teamMembers
+            .filter((u) => !!u.dateOfBirth)
+            .map((u) => {
+            const parts = String(u.dateOfBirth).split('-');
+            let birthMonth = -1;
+            let birthDay = -1;
+            if (parts.length === 3) {
+                birthMonth = parseInt(parts[1], 10) - 1;
+                birthDay = parseInt(parts[2], 10);
+            }
+            else if (parts.length === 2) {
+                birthMonth = parseInt(parts[0], 10) - 1;
+                birthDay = parseInt(parts[1], 10);
+            }
+            if (birthMonth < 0 || isNaN(birthMonth) || birthDay <= 0 || isNaN(birthDay)) {
+                return null;
+            }
+            let nextBirthday = new Date(currentYear, birthMonth, birthDay);
+            if (nextBirthday.getTime() < todayStart) {
+                nextBirthday = new Date(currentYear + 1, birthMonth, birthDay);
+            }
+            const diffMs = nextBirthday.getTime() - todayStart;
+            const daysRemaining = Math.round(diffMs / (1000 * 60 * 60 * 24));
+            const formattedDate = `${birthDay} ${monthShortNames[birthMonth]}`;
+            let statusText = '';
+            if (daysRemaining === 0) {
+                statusText = 'Today! 🎂';
+            }
+            else if (daysRemaining === 1) {
+                statusText = 'Tomorrow 🎉';
+            }
+            else {
+                statusText = `In ${daysRemaining} days`;
+            }
+            return {
+                id: u.id,
+                name: u.name,
+                email: u.email,
+                picture: u.picture,
+                role: u.role,
+                department: u.department?.name || 'General',
+                designation: u.designation?.title || 'Team Member',
+                dateOfBirth: u.dateOfBirth,
+                formattedDate,
+                daysRemaining,
+                statusText,
+                isToday: daysRemaining === 0,
+            };
+        })
+            .filter(Boolean)
+            .sort((a, b) => a.daysRemaining - b.daysRemaining);
+        const newJoiners = teamMembers
+            .map((u) => {
+            const joinDate = u.joiningDate ? new Date(u.joiningDate) : new Date(u.createdAt);
+            const joinTime = joinDate.getTime();
+            const diffMs = Math.max(0, nowTime.getTime() - joinTime);
+            const daysAgo = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            let relativeTime = '';
+            if (daysAgo <= 0) {
+                relativeTime = 'Joined today';
+            }
+            else if (daysAgo === 1) {
+                relativeTime = '1 day ago';
+            }
+            else if (daysAgo < 30) {
+                relativeTime = `${daysAgo} days ago`;
+            }
+            else if (daysAgo < 365) {
+                const months = Math.floor(daysAgo / 30);
+                relativeTime = months === 1 ? '1 month ago' : `${months} months ago`;
+            }
+            else {
+                const years = Math.floor(daysAgo / 365);
+                relativeTime = years === 1 ? '1 year ago' : `${years} years ago`;
+            }
+            const formattedDate = joinDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+            });
+            const exactTime = joinDate.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+            });
+            return {
+                id: u.id,
+                name: u.name,
+                email: u.email,
+                picture: u.picture,
+                role: u.role,
+                department: u.department?.name || 'General',
+                designation: u.designation?.title || 'Team Member',
+                joiningDate: u.joiningDate || u.createdAt,
+                createdAt: u.createdAt,
+                formattedDate,
+                exactTime,
+                fullDateTime: `${formattedDate} at ${exactTime}`,
+                daysAgo,
+                relativeTime,
+                isNew: daysAgo <= 45,
+            };
+        })
+            .sort((a, b) => a.daysAgo - b.daysAgo)
+            .slice(0, 8);
         return {
             projectDeliveries: Math.max(projectDeliveries, 50),
             inHouseExperts: Math.max(inHouseExperts, 15),
@@ -286,6 +396,8 @@ let StatsService = class StatsService {
                 profitDistribution,
             },
             recentOrders,
+            upcomingBirthdays,
+            newJoiners,
         };
     }
 };

@@ -53,6 +53,12 @@ export class User {
   @Column({ type: 'boolean', default: false })
   isPreview: boolean;
 
+  @Column({ type: 'varchar', length: 30, nullable: true })
+  dateOfBirth: string;
+
+  @Column({ type: 'varchar', length: 30, nullable: true })
+  joiningDate: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

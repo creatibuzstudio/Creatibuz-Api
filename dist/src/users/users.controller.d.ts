@@ -29,6 +29,8 @@ export declare class UsersController {
         designation: import("../designation/entities/designation.entity").Designation;
         order: number;
         isPreview: boolean;
+        dateOfBirth: string;
+        joiningDate: string;
         createdAt: Date;
         updatedAt: Date;
         statusCode: HttpStatus;
