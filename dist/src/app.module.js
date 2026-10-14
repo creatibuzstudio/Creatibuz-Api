@@ -32,6 +32,7 @@ const serve_static_1 = require("@nestjs/serve-static");
 const path_1 = require("path");
 const uploads_module_1 = require("./uploads/uploads.module");
 const finance_module_1 = require("./finance/finance.module");
+const payroll_module_1 = require("./payroll/payroll.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -72,6 +73,7 @@ exports.AppModule = AppModule = __decorate([
             stats_module_1.StatsModule,
             uploads_module_1.UploadsModule,
             finance_module_1.FinanceModule,
+            payroll_module_1.PayrollModule,
             serve_static_1.ServeStaticModule.forRoot({
                 rootPath: (0, path_1.join)(__dirname, '..', 'uploads'),
                 serveRoot: '/cdn/',

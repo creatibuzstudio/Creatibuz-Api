@@ -56,6 +56,9 @@ export class User {
   @Column({ type: 'varchar', length: 30, nullable: true })
   dateOfBirth: string;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  salary: number;
+
   @Column({ type: 'varchar', length: 30, nullable: true })
   joiningDate: string;
 

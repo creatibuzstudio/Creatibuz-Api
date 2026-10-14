@@ -82,6 +82,10 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "dateOfBirth", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 0 }),
+    __metadata("design:type", Number)
+], User.prototype, "salary", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 30, nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "joiningDate", void 0);

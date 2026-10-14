@@ -12,5 +12,6 @@ export declare class CreateUserDto {
     order?: number;
     isPreview?: boolean;
     dateOfBirth?: string;
+    salary?: number;
     joiningDate?: string;
 }

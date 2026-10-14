@@ -26,6 +26,7 @@ export declare class User {
     order: number;
     isPreview: boolean;
     dateOfBirth: string;
+    salary: number;
     joiningDate: string;
     createdAt: Date;
     updatedAt: Date;

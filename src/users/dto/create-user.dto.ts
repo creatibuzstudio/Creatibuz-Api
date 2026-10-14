@@ -51,6 +51,10 @@ export class CreateUserDto {
   dateOfBirth?: string;
 
   @IsOptional()
+  @IsNumber()
+  salary?: number;
+
+  @IsOptional()
   @IsString()
   joiningDate?: string;
 }

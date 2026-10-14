@@ -30,6 +30,7 @@ export declare class UsersController {
         order: number;
         isPreview: boolean;
         dateOfBirth: string;
+        salary: number;
         joiningDate: string;
         createdAt: Date;
         updatedAt: Date;
