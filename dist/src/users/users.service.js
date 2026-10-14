@@ -56,6 +56,10 @@ let UsersService = class UsersService {
         this.userRepository = userRepository;
     }
     async create(createUserDto) {
+        const existing = await this.findByEmail(createUserDto.email);
+        if (existing) {
+            throw new common_1.ConflictException(`An account with email ${createUserDto.email} already exists`);
+        }
         const { departmentId, designationId, password, ...rest } = createUserDto;
         const hashedPassword = await bcrypt.hash(password, 10);
         const payload = { ...rest, password: hashedPassword };

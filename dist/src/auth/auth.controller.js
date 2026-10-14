@@ -18,6 +18,8 @@ const auth_service_1 = require("./auth.service");
 const login_dto_1 = require("./dto/login.dto");
 const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
 const users_service_1 = require("../users/users.service");
+const create_user_dto_1 = require("../users/dto/create-user.dto");
+const user_entity_1 = require("../users/entities/user.entity");
 let AuthController = class AuthController {
     constructor(authService, usersService) {
         this.authService = authService;
@@ -45,6 +47,17 @@ let AuthController = class AuthController {
         }
         return this.authService.login(user);
     }
+    async register(createUserDto) {
+        const user = await this.usersService.create({
+            ...createUserDto,
+            role: createUserDto.role || user_entity_1.UserRole.EMPLOYEE,
+        });
+        return {
+            statusCode: common_1.HttpStatus.CREATED,
+            message: 'Registration successful! Welcome to the team.',
+            data: user,
+        };
+    }
     getProfile(req) {
         return this.usersService.findOne(req.user.userId);
     }
@@ -66,6 +79,14 @@ __decorate([
     __metadata("design:paramtypes", [login_dto_1.LoginDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "adminLogin", null);
+__decorate([
+    (0, common_1.Post)('register'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "register", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)('me'),
