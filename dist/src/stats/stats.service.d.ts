@@ -101,6 +101,7 @@ export declare class StatsService {
             invoiceNumber: string;
             createdAt: Date;
         }[];
+        runningMonthName: string;
         upcomingBirthdays: {
             id: string;
             name: string;
@@ -111,9 +112,11 @@ export declare class StatsService {
             designation: string;
             dateOfBirth: string;
             formattedDate: string;
-            daysRemaining: number;
+            birthDay: number;
+            diffDays: number;
             statusText: string;
             isToday: boolean;
+            isPast: boolean;
         }[];
         newJoiners: {
             id: string;

@@ -276,12 +276,19 @@ export class StatsService {
       };
     });
 
-    // 10. Upcoming Birthdays (from all active users/team members)
+    // 10. Upcoming Birthdays (Filtered STRICTLY for the RUNNING MONTH)
     const nowTime = new Date();
     const currentYear = nowTime.getFullYear();
-    const todayStart = new Date(currentYear, nowTime.getMonth(), nowTime.getDate()).getTime();
+    const currentMonth = nowTime.getMonth(); // 0-indexed (e.g. 9 for October)
+    const todayDate = nowTime.getDate(); // 1-31
+    const todayStart = new Date(currentYear, currentMonth, todayDate).getTime();
     const teamMembers = allUsers.filter((u) => u.role !== UserRole.CLIENT);
     const monthShortNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthFullNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    const runningMonthName = monthFullNames[currentMonth];
 
     const upcomingBirthdays = teamMembers
       .filter((u) => !!u.dateOfBirth)
@@ -301,22 +308,29 @@ export class StatsService {
           return null;
         }
 
-        let nextBirthday = new Date(currentYear, birthMonth, birthDay);
-        if (nextBirthday.getTime() < todayStart) {
-          nextBirthday = new Date(currentYear + 1, birthMonth, birthDay);
+        // STRICT FILTER: Only birthdays in the RUNNING MONTH
+        if (birthMonth !== currentMonth) {
+          return null;
         }
 
-        const diffMs = nextBirthday.getTime() - todayStart;
-        const daysRemaining = Math.round(diffMs / (1000 * 60 * 60 * 24));
         const formattedDate = `${birthDay} ${monthShortNames[birthMonth]}`;
+        const diffDays = birthDay - todayDate;
 
         let statusText = '';
-        if (daysRemaining === 0) {
+        let isToday = false;
+        let isPast = false;
+
+        if (diffDays === 0) {
           statusText = 'Today! 🎂';
-        } else if (daysRemaining === 1) {
+          isToday = true;
+        } else if (diffDays === 1) {
           statusText = 'Tomorrow 🎉';
+        } else if (diffDays > 1) {
+          statusText = `In ${diffDays} days`;
         } else {
-          statusText = `In ${daysRemaining} days`;
+          const pastDays = Math.abs(diffDays);
+          statusText = pastDays === 1 ? 'Yesterday' : `${pastDays} days ago`;
+          isPast = true;
         }
 
         return {
@@ -329,13 +343,27 @@ export class StatsService {
           designation: u.designation?.title || 'Team Member',
           dateOfBirth: u.dateOfBirth,
           formattedDate,
-          daysRemaining,
+          birthDay,
+          diffDays,
           statusText,
-          isToday: daysRemaining === 0,
+          isToday,
+          isPast,
         };
       })
       .filter(Boolean)
-      .sort((a, b) => a.daysRemaining - b.daysRemaining);
+      .sort((a, b) => {
+        // Prioritize today and upcoming (diffDays >= 0) sorted ASC, then past birthdays (diffDays < 0) sorted DESC
+        if (a.diffDays >= 0 && b.diffDays >= 0) {
+          return a.diffDays - b.diffDays;
+        }
+        if (a.diffDays >= 0 && b.diffDays < 0) {
+          return -1;
+        }
+        if (a.diffDays < 0 && b.diffDays >= 0) {
+          return 1;
+        }
+        return b.diffDays - a.diffDays;
+      });
 
     // 11. Recent Team Joiners (with exact timestamp and relative time)
     const newJoiners = teamMembers
@@ -461,6 +489,7 @@ export class StatsService {
       },
 
       recentOrders,
+      runningMonthName,
       upcomingBirthdays,
       newJoiners,
     };

@@ -233,9 +233,16 @@ let StatsService = class StatsService {
         });
         const nowTime = new Date();
         const currentYear = nowTime.getFullYear();
-        const todayStart = new Date(currentYear, nowTime.getMonth(), nowTime.getDate()).getTime();
+        const currentMonth = nowTime.getMonth();
+        const todayDate = nowTime.getDate();
+        const todayStart = new Date(currentYear, currentMonth, todayDate).getTime();
         const teamMembers = allUsers.filter((u) => u.role !== user_entity_1.UserRole.CLIENT);
         const monthShortNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthFullNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December',
+        ];
+        const runningMonthName = monthFullNames[currentMonth];
         const upcomingBirthdays = teamMembers
             .filter((u) => !!u.dateOfBirth)
             .map((u) => {
@@ -253,22 +260,28 @@ let StatsService = class StatsService {
             if (birthMonth < 0 || isNaN(birthMonth) || birthDay <= 0 || isNaN(birthDay)) {
                 return null;
             }
-            let nextBirthday = new Date(currentYear, birthMonth, birthDay);
-            if (nextBirthday.getTime() < todayStart) {
-                nextBirthday = new Date(currentYear + 1, birthMonth, birthDay);
+            if (birthMonth !== currentMonth) {
+                return null;
             }
-            const diffMs = nextBirthday.getTime() - todayStart;
-            const daysRemaining = Math.round(diffMs / (1000 * 60 * 60 * 24));
             const formattedDate = `${birthDay} ${monthShortNames[birthMonth]}`;
+            const diffDays = birthDay - todayDate;
             let statusText = '';
-            if (daysRemaining === 0) {
+            let isToday = false;
+            let isPast = false;
+            if (diffDays === 0) {
                 statusText = 'Today! 🎂';
+                isToday = true;
             }
-            else if (daysRemaining === 1) {
+            else if (diffDays === 1) {
                 statusText = 'Tomorrow 🎉';
             }
+            else if (diffDays > 1) {
+                statusText = `In ${diffDays} days`;
+            }
             else {
-                statusText = `In ${daysRemaining} days`;
+                const pastDays = Math.abs(diffDays);
+                statusText = pastDays === 1 ? 'Yesterday' : `${pastDays} days ago`;
+                isPast = true;
             }
             return {
                 id: u.id,
@@ -280,13 +293,26 @@ let StatsService = class StatsService {
                 designation: u.designation?.title || 'Team Member',
                 dateOfBirth: u.dateOfBirth,
                 formattedDate,
-                daysRemaining,
+                birthDay,
+                diffDays,
                 statusText,
-                isToday: daysRemaining === 0,
+                isToday,
+                isPast,
             };
         })
             .filter(Boolean)
-            .sort((a, b) => a.daysRemaining - b.daysRemaining);
+            .sort((a, b) => {
+            if (a.diffDays >= 0 && b.diffDays >= 0) {
+                return a.diffDays - b.diffDays;
+            }
+            if (a.diffDays >= 0 && b.diffDays < 0) {
+                return -1;
+            }
+            if (a.diffDays < 0 && b.diffDays >= 0) {
+                return 1;
+            }
+            return b.diffDays - a.diffDays;
+        });
         const newJoiners = teamMembers
             .map((u) => {
             const joinDate = u.joiningDate ? new Date(u.joiningDate) : new Date(u.createdAt);
@@ -396,6 +422,7 @@ let StatsService = class StatsService {
                 profitDistribution,
             },
             recentOrders,
+            runningMonthName,
             upcomingBirthdays,
             newJoiners,
         };
