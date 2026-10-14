@@ -109,5 +109,9 @@ export declare class PayrollController {
         payroll: import("./entities/monthly-payroll.entity").MonthlyPayroll;
     }>;
     getPayrollHistory(): Promise<import("./entities/monthly-payroll.entity").MonthlyPayroll[]>;
+    getMyPayslips(userId?: string, email?: string): Promise<{
+        payslips: import("./entities/payroll-item.entity").PayrollItem[];
+        currentMonthEstimate: any;
+    }>;
     getPayslip(id: string): Promise<import("./entities/payroll-item.entity").PayrollItem>;
 }

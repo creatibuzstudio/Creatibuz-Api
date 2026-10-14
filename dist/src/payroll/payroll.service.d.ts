@@ -120,4 +120,8 @@ export declare class PayrollService {
     }>;
     getPayrollHistory(): Promise<MonthlyPayroll[]>;
     getPayslip(id: string): Promise<PayrollItem>;
+    getMyPayslips(userId?: string, email?: string): Promise<{
+        payslips: PayrollItem[];
+        currentMonthEstimate: any;
+    }>;
 }

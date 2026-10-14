@@ -626,4 +626,72 @@ export class PayrollService {
     if (!item) throw new NotFoundException(`Payroll item with ID ${id} not found`);
     return item;
   }
+
+  // -------------------------------------------------------------
+  // 7. GET MY PAYSLIPS (FOR LOGGED-IN USERS)
+  // -------------------------------------------------------------
+  async getMyPayslips(userId?: string, email?: string) {
+    if (!userId && !email) {
+      return {
+        payslips: [],
+        currentMonthEstimate: null,
+      };
+    }
+
+    const qb = this.itemRepository
+      .createQueryBuilder('item')
+      .leftJoinAndSelect('item.monthlyPayroll', 'monthlyPayroll')
+      .leftJoinAndSelect('item.user', 'user')
+      .orderBy('monthlyPayroll.monthYear', 'DESC')
+      .addOrderBy('item.createdAt', 'DESC');
+
+    if (userId && email) {
+      qb.where(
+        '(item.userId = :userId OR LOWER(item.recipientEmail) = LOWER(:email))',
+        { userId, email: email.trim() },
+      );
+    } else if (userId) {
+      qb.where('item.userId = :userId', { userId });
+    } else if (email) {
+      qb.where('LOWER(item.recipientEmail) = LOWER(:email)', {
+        email: email.trim(),
+      });
+    }
+
+    const items = await qb.getMany();
+
+    // Check current month estimate
+    let currentMonthEstimate: any = null;
+    try {
+      const summary = await this.getMonthlySummary();
+      const currentItem = items.find(
+        (it) => it.monthlyPayroll?.monthYear === summary.monthYear,
+      );
+      if (!currentItem) {
+        const emp = summary.employees?.find(
+          (e: any) =>
+            (userId && e.userId === userId) ||
+            (email && e.email?.toLowerCase() === email.toLowerCase().trim()),
+        );
+        if (emp) {
+          currentMonthEstimate = {
+            monthYear: summary.monthYear,
+            monthName: summary.monthName,
+            poolSharePercent: emp.poolSharePercent,
+            estimatedAmount: emp.profitShareAmount,
+            isPayrollDisbursed: summary.summary?.isPayrollDisbursed || false,
+            totalEmployeePool: summary.summary?.totalEmployeePool || 0,
+          };
+        }
+      }
+    } catch (err) {
+      // ignore estimate errors
+    }
+
+    return {
+      payslips: items,
+      currentMonthEstimate,
+    };
+  }
 }
+

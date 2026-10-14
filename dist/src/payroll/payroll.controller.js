@@ -37,6 +37,9 @@ let PayrollController = class PayrollController {
     async getPayrollHistory() {
         return await this.payrollService.getPayrollHistory();
     }
+    async getMyPayslips(userId, email) {
+        return await this.payrollService.getMyPayslips(userId, email);
+    }
     async getPayslip(id) {
         return await this.payrollService.getPayslip(id);
     }
@@ -76,6 +79,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], PayrollController.prototype, "getPayrollHistory", null);
+__decorate([
+    (0, common_1.Get)('my-payslips'),
+    __param(0, (0, common_1.Query)('userId')),
+    __param(1, (0, common_1.Query)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], PayrollController.prototype, "getMyPayslips", null);
 __decorate([
     (0, common_1.Get)('item/:id'),
     __param(0, (0, common_1.Param)('id')),

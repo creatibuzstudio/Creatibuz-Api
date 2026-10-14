@@ -478,6 +478,57 @@ let PayrollService = class PayrollService {
             throw new common_1.NotFoundException(`Payroll item with ID ${id} not found`);
         return item;
     }
+    async getMyPayslips(userId, email) {
+        if (!userId && !email) {
+            return {
+                payslips: [],
+                currentMonthEstimate: null,
+            };
+        }
+        const qb = this.itemRepository
+            .createQueryBuilder('item')
+            .leftJoinAndSelect('item.monthlyPayroll', 'monthlyPayroll')
+            .leftJoinAndSelect('item.user', 'user')
+            .orderBy('monthlyPayroll.monthYear', 'DESC')
+            .addOrderBy('item.createdAt', 'DESC');
+        if (userId && email) {
+            qb.where('(item.userId = :userId OR LOWER(item.recipientEmail) = LOWER(:email))', { userId, email: email.trim() });
+        }
+        else if (userId) {
+            qb.where('item.userId = :userId', { userId });
+        }
+        else if (email) {
+            qb.where('LOWER(item.recipientEmail) = LOWER(:email)', {
+                email: email.trim(),
+            });
+        }
+        const items = await qb.getMany();
+        let currentMonthEstimate = null;
+        try {
+            const summary = await this.getMonthlySummary();
+            const currentItem = items.find((it) => it.monthlyPayroll?.monthYear === summary.monthYear);
+            if (!currentItem) {
+                const emp = summary.employees?.find((e) => (userId && e.userId === userId) ||
+                    (email && e.email?.toLowerCase() === email.toLowerCase().trim()));
+                if (emp) {
+                    currentMonthEstimate = {
+                        monthYear: summary.monthYear,
+                        monthName: summary.monthName,
+                        poolSharePercent: emp.poolSharePercent,
+                        estimatedAmount: emp.profitShareAmount,
+                        isPayrollDisbursed: summary.summary?.isPayrollDisbursed || false,
+                        totalEmployeePool: summary.summary?.totalEmployeePool || 0,
+                    };
+                }
+            }
+        }
+        catch (err) {
+        }
+        return {
+            payslips: items,
+            currentMonthEstimate,
+        };
+    }
 };
 exports.PayrollService = PayrollService;
 exports.PayrollService = PayrollService = __decorate([

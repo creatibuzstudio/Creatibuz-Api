@@ -40,8 +40,17 @@ export class PayrollController {
     return await this.payrollService.getPayrollHistory();
   }
 
+  @Get('my-payslips')
+  async getMyPayslips(
+    @Query('userId') userId?: string,
+    @Query('email') email?: string,
+  ) {
+    return await this.payrollService.getMyPayslips(userId, email);
+  }
+
   @Get('item/:id')
   async getPayslip(@Param('id') id: string) {
     return await this.payrollService.getPayslip(id);
   }
 }
+
