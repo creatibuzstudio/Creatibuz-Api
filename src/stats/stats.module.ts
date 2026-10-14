@@ -5,9 +5,27 @@ import { StatsController } from './stats.controller';
 import { Casestudy } from '../casestudies/entities/casestudy.entity';
 import { User } from '../users/entities/user.entity';
 import { Partner } from '../partners/entities/partner.entity';
+import { Order } from '../orders/entities/order.entity';
+import { InvestorCapital } from '../finance/entities/investor-capital.entity';
+import { CompanyExpense } from '../finance/entities/company-expense.entity';
+import { FinancialSetting } from '../finance/entities/financial-setting.entity';
+import { Blog } from '../blog/entities/blog.entity';
+import { Review } from '../review/entities/review.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Casestudy, User, Partner])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Casestudy,
+      User,
+      Partner,
+      Order,
+      InvestorCapital,
+      CompanyExpense,
+      FinancialSetting,
+      Blog,
+      Review,
+    ]),
+  ],
   controllers: [StatsController],
   providers: [StatsService],
 })

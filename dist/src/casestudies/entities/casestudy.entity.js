@@ -24,21 +24,25 @@ __decorate([
     __metadata("design:type", String)
 ], Casestudy.prototype, "title", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 255 }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, unique: true }),
     __metadata("design:type", String)
 ], Casestudy.prototype, "slug", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 500 }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 500, nullable: true }),
     __metadata("design:type", String)
 ], Casestudy.prototype, "shortDescription", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text' }),
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
 ], Casestudy.prototype, "fullDescription", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 255 }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
     __metadata("design:type", String)
 ], Casestudy.prototype, "photoUrl", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
+    __metadata("design:type", Object)
+], Casestudy.prototype, "images", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'uuid', nullable: true }),
     __metadata("design:type", String)
@@ -49,17 +53,57 @@ __decorate([
     __metadata("design:type", category_entity_1.Category)
 ], Casestudy.prototype, "category", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 100, nullable: true }),
+    __metadata("design:type", String)
+], Casestudy.prototype, "tag", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 50, nullable: true }),
+    __metadata("design:type", String)
+], Casestudy.prototype, "bgColor", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
     __metadata("design:type", String)
 ], Casestudy.prototype, "projectLink", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
+    __metadata("design:type", Array)
+], Casestudy.prototype, "stats", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
+    __metadata("design:type", Array)
+], Casestudy.prototype, "metrics", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
 ], Casestudy.prototype, "challenge", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
+    __metadata("design:type", String)
+], Casestudy.prototype, "challengePhoto", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Casestudy.prototype, "challengePhotoDescription", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
+    __metadata("design:type", Array)
+], Casestudy.prototype, "challengePhotos", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
 ], Casestudy.prototype, "solution", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
+    __metadata("design:type", String)
+], Casestudy.prototype, "solutionPhoto", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Casestudy.prototype, "solutionPhotoDescription", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
+    __metadata("design:type", Array)
+], Casestudy.prototype, "solutionPhotos", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)

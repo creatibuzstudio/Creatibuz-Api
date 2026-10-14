@@ -41,6 +41,10 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 0 }),
     __metadata("design:type", Number)
+], Order.prototype, "subtotal", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 0 }),
+    __metadata("design:type", Number)
 ], Order.prototype, "budget", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 0 }),
@@ -59,9 +63,49 @@ __decorate([
     __metadata("design:type", String)
 ], Order.prototype, "status", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 100, nullable: true }),
+    __metadata("design:type", String)
+], Order.prototype, "invoiceNumber", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 50, nullable: true }),
     __metadata("design:type", String)
 ], Order.prototype, "projectProgress", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
+    __metadata("design:type", Date)
+], Order.prototype, "dueDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 0 }),
+    __metadata("design:type", Number)
+], Order.prototype, "discount", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 0 }),
+    __metadata("design:type", Number)
+], Order.prototype, "tax", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true, default: () => "'[]'" }),
+    __metadata("design:type", Array)
+], Order.prototype, "payments", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Order.prototype, "notes", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 150, nullable: true }),
+    __metadata("design:type", String)
+], Order.prototype, "clientName", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 150, nullable: true }),
+    __metadata("design:type", String)
+], Order.prototype, "clientEmail", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 50, nullable: true }),
+    __metadata("design:type", String)
+], Order.prototype, "clientPhone", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
+    __metadata("design:type", String)
+], Order.prototype, "clientAddress", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.User, { nullable: true, onDelete: 'SET NULL' }),
     __metadata("design:type", user_entity_1.User)

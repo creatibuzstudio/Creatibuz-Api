@@ -23,6 +23,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { UploadsModule } from './uploads/uploads.module';
 
+import { FinanceModule } from './finance/finance.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -58,6 +60,7 @@ import { UploadsModule } from './uploads/uploads.module';
     ContactModule,
     StatsModule,
     UploadsModule,
+    FinanceModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/cdn/',

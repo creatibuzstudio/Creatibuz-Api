@@ -23,6 +23,8 @@ export declare class User {
     role: UserRole;
     department: Department;
     designation: Designation;
+    order: number;
+    isPreview: boolean;
     createdAt: Date;
     updatedAt: Date;
 }

@@ -19,6 +19,12 @@ let StatsController = class StatsController {
     getStats() {
         return this.statsService.getStats();
     }
+    getDashboardStats() {
+        return this.statsService.getStats();
+    }
+    getOverviewStats() {
+        return this.statsService.getStats();
+    }
 };
 exports.StatsController = StatsController;
 __decorate([
@@ -27,6 +33,18 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], StatsController.prototype, "getStats", null);
+__decorate([
+    (0, common_1.Get)('dashboard'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], StatsController.prototype, "getDashboardStats", null);
+__decorate([
+    (0, common_1.Get)('overview'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], StatsController.prototype, "getOverviewStats", null);
 exports.StatsController = StatsController = __decorate([
     (0, common_1.Controller)('stats'),
     __metadata("design:paramtypes", [stats_service_1.StatsService])

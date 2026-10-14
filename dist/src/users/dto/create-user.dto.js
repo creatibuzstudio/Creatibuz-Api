@@ -60,4 +60,14 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "designationId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateUserDto.prototype, "order", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateUserDto.prototype, "isPreview", void 0);
 //# sourceMappingURL=create-user.dto.js.map

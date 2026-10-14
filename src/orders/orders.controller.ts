@@ -1,7 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus } from '@nestjs/common';
-import { OrdersService } from './orders.service';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpStatus,
+  Query,
+} from '@nestjs/common';
+import { OrdersService, OrderQueryOptions } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { RecordPaymentDto } from './dto/record-payment.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -17,12 +28,35 @@ export class OrdersController {
     };
   }
 
+  @Post(':id/payment')
+  async recordPayment(
+    @Param('id') id: string,
+    @Body() recordPaymentDto: RecordPaymentDto,
+  ) {
+    const data = await this.ordersService.addPayment(id, recordPaymentDto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Payment recorded and receipt created successfully',
+      data,
+    };
+  }
+
   @Get()
-  async findAll() {
-    const data = await this.ordersService.findAll();
+  async findAll(@Query() query?: OrderQueryOptions) {
+    const data = await this.ordersService.findAll(query);
     return {
       statusCode: HttpStatus.OK,
       message: 'Orders retrieved successfully',
+      data,
+    };
+  }
+
+  @Get('invoice/:invoiceNumber')
+  async findByInvoiceNumber(@Param('invoiceNumber') invoiceNumber: string) {
+    const data = await this.ordersService.findByInvoiceNumber(invoiceNumber);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Order invoice retrieved successfully',
       data,
     };
   }

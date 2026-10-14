@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 import { UserRole } from '../entities/user.entity';
 
 export class CreateUserDto {
@@ -37,4 +37,12 @@ export class CreateUserDto {
   @IsOptional()
   @IsUUID()
   designationId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  order?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isPreview?: boolean;
 }

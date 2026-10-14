@@ -9,4 +9,14 @@ export class StatsController {
   getStats() {
     return this.statsService.getStats();
   }
+
+  @Get('dashboard')
+  getDashboardStats() {
+    return this.statsService.getStats();
+  }
+
+  @Get('overview')
+  getOverviewStats() {
+    return this.statsService.getStats();
+  }
 }

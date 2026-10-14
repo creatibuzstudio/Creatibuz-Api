@@ -21,8 +21,46 @@ let CasestudiesService = class CasestudiesService {
     constructor(casestudyRepository) {
         this.casestudyRepository = casestudyRepository;
     }
+    generateSlug(text) {
+        return text
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/[\s_-]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+    normalizePayload(dto) {
+        const payload = { ...dto };
+        if (payload.stats && !payload.metrics) {
+            payload.metrics = payload.stats.map((s) => ({
+                label: s.label || s.name,
+                value: s.value || s.count,
+                name: s.name || s.label,
+                count: s.count || s.value,
+            }));
+        }
+        else if (payload.metrics && !payload.stats) {
+            payload.stats = payload.metrics.map((m) => ({
+                name: m.name || m.label,
+                count: m.count || m.value,
+                label: m.label || m.name,
+                value: m.value || m.count,
+            }));
+        }
+        return payload;
+    }
     async create(createCasestudyDto) {
-        const casestudy = this.casestudyRepository.create(createCasestudyDto);
+        const payload = this.normalizePayload(createCasestudyDto);
+        if (!payload.slug && payload.title) {
+            const baseSlug = this.generateSlug(payload.title) || 'case-study';
+            let slug = baseSlug;
+            const existing = await this.casestudyRepository.findOne({ where: { slug } });
+            if (existing) {
+                slug = `${baseSlug}-${Date.now().toString(36)}`;
+            }
+            payload.slug = slug;
+        }
+        const casestudy = this.casestudyRepository.create(payload);
         return await this.casestudyRepository.save(casestudy);
     }
     async findAll() {
@@ -36,19 +74,40 @@ let CasestudiesService = class CasestudiesService {
             },
         });
     }
-    async findOne(id) {
+    async findBySlug(slug) {
         const casestudy = await this.casestudyRepository.findOne({
-            where: { id },
+            where: { slug },
             relations: { category: true },
         });
         if (!casestudy) {
-            throw new common_1.NotFoundException(`Casestudy with ID ${id} not found`);
+            throw new common_1.NotFoundException(`Casestudy with slug '${slug}' not found`);
+        }
+        return casestudy;
+    }
+    async findOne(idOrSlug) {
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idOrSlug);
+        let casestudy = null;
+        if (isUuid) {
+            casestudy = await this.casestudyRepository.findOne({
+                where: { id: idOrSlug },
+                relations: { category: true },
+            });
+        }
+        if (!casestudy) {
+            casestudy = await this.casestudyRepository.findOne({
+                where: { slug: idOrSlug },
+                relations: { category: true },
+            });
+        }
+        if (!casestudy) {
+            throw new common_1.NotFoundException(`Casestudy with ID or Slug '${idOrSlug}' not found`);
         }
         return casestudy;
     }
     async update(id, updateCasestudyDto) {
         const casestudy = await this.findOne(id);
-        Object.assign(casestudy, updateCasestudyDto);
+        const payload = this.normalizePayload(updateCasestudyDto);
+        Object.assign(casestudy, payload);
         return await this.casestudyRepository.save(casestudy);
     }
     async remove(id) {

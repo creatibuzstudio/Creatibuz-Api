@@ -37,6 +37,14 @@ let CasestudiesController = class CasestudiesController {
             data,
         };
     }
+    async findBySlug(slug) {
+        const data = await this.casestudiesService.findBySlug(slug);
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'Casestudy retrieved successfully',
+            data,
+        };
+    }
     async findOne(id) {
         const data = await this.casestudiesService.findOne(id);
         return {
@@ -75,6 +83,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CasestudiesController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('slug/:slug'),
+    __param(0, (0, common_1.Param)('slug')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CasestudiesController.prototype, "findBySlug", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

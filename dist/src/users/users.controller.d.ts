@@ -27,6 +27,8 @@ export declare class UsersController {
         role: UserRole;
         department: import("../department/entities/department.entity").Department;
         designation: import("../designation/entities/designation.entity").Designation;
+        order: number;
+        isPreview: boolean;
         createdAt: Date;
         updatedAt: Date;
         statusCode: HttpStatus;

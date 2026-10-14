@@ -69,6 +69,7 @@ let UsersService = class UsersService {
     async findAll() {
         return await this.userRepository.find({
             relations: { department: true, designation: true },
+            order: { order: 'ASC', createdAt: 'DESC' },
         });
     }
     async findByEmail(email) {

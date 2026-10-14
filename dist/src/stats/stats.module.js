@@ -14,12 +14,30 @@ const stats_controller_1 = require("./stats.controller");
 const casestudy_entity_1 = require("../casestudies/entities/casestudy.entity");
 const user_entity_1 = require("../users/entities/user.entity");
 const partner_entity_1 = require("../partners/entities/partner.entity");
+const order_entity_1 = require("../orders/entities/order.entity");
+const investor_capital_entity_1 = require("../finance/entities/investor-capital.entity");
+const company_expense_entity_1 = require("../finance/entities/company-expense.entity");
+const financial_setting_entity_1 = require("../finance/entities/financial-setting.entity");
+const blog_entity_1 = require("../blog/entities/blog.entity");
+const review_entity_1 = require("../review/entities/review.entity");
 let StatsModule = class StatsModule {
 };
 exports.StatsModule = StatsModule;
 exports.StatsModule = StatsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([casestudy_entity_1.Casestudy, user_entity_1.User, partner_entity_1.Partner])],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([
+                casestudy_entity_1.Casestudy,
+                user_entity_1.User,
+                partner_entity_1.Partner,
+                order_entity_1.Order,
+                investor_capital_entity_1.InvestorCapital,
+                company_expense_entity_1.CompanyExpense,
+                financial_setting_entity_1.FinancialSetting,
+                blog_entity_1.Blog,
+                review_entity_1.Review,
+            ]),
+        ],
         controllers: [stats_controller_1.StatsController],
         providers: [stats_service_1.StatsService],
     })

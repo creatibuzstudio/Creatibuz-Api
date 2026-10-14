@@ -27,6 +27,16 @@ export class CasestudiesController {
     };
   }
 
+  @Get('slug/:slug')
+  async findBySlug(@Param('slug') slug: string) {
+    const data = await this.casestudiesService.findBySlug(slug);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Casestudy retrieved successfully',
+      data,
+    };
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const data = await this.casestudiesService.findOne(id);

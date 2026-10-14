@@ -23,12 +23,22 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
+], CreateOrderDto.prototype, "subtotal", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
 ], CreateOrderDto.prototype, "budget", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], CreateOrderDto.prototype, "advance", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(order_entity_1.PaymentStatus),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "paymentStatus", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
@@ -45,6 +55,51 @@ __decorate([
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "projectProgress", void 0);
 __decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "invoiceNumber", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "dueDate", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateOrderDto.prototype, "discount", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateOrderDto.prototype, "tax", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "notes", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "clientName", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "clientEmail", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "clientPhone", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "clientAddress", void 0);
+__decorate([
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -54,4 +109,9 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "categoryId", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateOrderDto.prototype, "payments", void 0);
 //# sourceMappingURL=create-order.dto.js.map

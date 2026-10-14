@@ -15,6 +15,11 @@ export declare class CasestudiesController {
         message: string;
         data: import("./entities/casestudy.entity").Casestudy[];
     }>;
+    findBySlug(slug: string): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+        data: import("./entities/casestudy.entity").Casestudy;
+    }>;
     findOne(id: string): Promise<{
         statusCode: HttpStatus;
         message: string;

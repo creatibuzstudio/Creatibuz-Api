@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const orders_service_1 = require("./orders.service");
 const create_order_dto_1 = require("./dto/create-order.dto");
 const update_order_dto_1 = require("./dto/update-order.dto");
+const record_payment_dto_1 = require("./dto/record-payment.dto");
 let OrdersController = class OrdersController {
     constructor(ordersService) {
         this.ordersService = ordersService;
@@ -29,11 +30,27 @@ let OrdersController = class OrdersController {
             data,
         };
     }
-    async findAll() {
-        const data = await this.ordersService.findAll();
+    async recordPayment(id, recordPaymentDto) {
+        const data = await this.ordersService.addPayment(id, recordPaymentDto);
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'Payment recorded and receipt created successfully',
+            data,
+        };
+    }
+    async findAll(query) {
+        const data = await this.ordersService.findAll(query);
         return {
             statusCode: common_1.HttpStatus.OK,
             message: 'Orders retrieved successfully',
+            data,
+        };
+    }
+    async findByInvoiceNumber(invoiceNumber) {
+        const data = await this.ordersService.findByInvoiceNumber(invoiceNumber);
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'Order invoice retrieved successfully',
             data,
         };
     }
@@ -78,11 +95,27 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Post)(':id/payment'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String, record_payment_dto_1.RecordPaymentDto]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "recordPayment", null);
+__decorate([
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('invoice/:invoiceNumber'),
+    __param(0, (0, common_1.Param)('invoiceNumber')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "findByInvoiceNumber", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

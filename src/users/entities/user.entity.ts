@@ -47,6 +47,12 @@ export class User {
   @ManyToOne(() => Designation, designation => designation.users, { nullable: true, onDelete: 'SET NULL' })
   designation: Designation;
 
+  @Column({ type: 'int', default: 0 })
+  order: number;
+
+  @Column({ type: 'boolean', default: false })
+  isPreview: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

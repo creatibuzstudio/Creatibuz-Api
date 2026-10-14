@@ -21,15 +21,57 @@ let OrdersService = class OrdersService {
     constructor(orderRepository) {
         this.orderRepository = orderRepository;
     }
+    generateInvoiceNumber() {
+        const year = new Date().getFullYear();
+        const random = Math.floor(100000 + Math.random() * 900000);
+        return `INV-${year}-${random}`;
+    }
+    generateReceiptNumber() {
+        const year = new Date().getFullYear();
+        const random = Math.floor(100000 + Math.random() * 900000);
+        return `REC-${year}-${random}`;
+    }
     async create(createOrderDto) {
+        const subtotal = createOrderDto.subtotal !== undefined
+            ? Number(createOrderDto.subtotal)
+            : Number(createOrderDto.budget || 0);
+        const discount = Number(createOrderDto.discount || 0);
+        const tax = Number(createOrderDto.tax || 0);
+        const budget = createOrderDto.budget !== undefined
+            ? Number(createOrderDto.budget)
+            : Math.max(0, subtotal - discount + tax);
+        const advance = Number(createOrderDto.advance || 0);
+        const initialPayments = Array.isArray(createOrderDto.payments) && createOrderDto.payments.length > 0
+            ? createOrderDto.payments
+            : advance > 0
+                ? [
+                    {
+                        id: `pmt-${Date.now()}`,
+                        amount: advance,
+                        paymentDate: new Date().toISOString().split('T')[0],
+                        paymentMethod: 'Initial Advance',
+                        receiptNumber: this.generateReceiptNumber(),
+                        note: 'Initial payment upon order onboarding',
+                        createdAt: new Date().toISOString(),
+                    },
+                ]
+                : [];
         const orderData = {
             ...createOrderDto,
+            subtotal,
+            budget,
+            advance,
+            discount,
+            tax,
+            payments: initialPayments,
+            invoiceNumber: createOrderDto.invoiceNumber || this.generateInvoiceNumber(),
             client: createOrderDto.clientId ? { id: createOrderDto.clientId } : undefined,
             category: createOrderDto.categoryId ? { id: createOrderDto.categoryId } : undefined,
         };
-        const advance = Number(createOrderDto.advance || 0);
-        const budget = Number(createOrderDto.budget || 0);
-        if (advance >= budget && budget > 0) {
+        if (createOrderDto.paymentStatus) {
+            orderData.paymentStatus = createOrderDto.paymentStatus;
+        }
+        else if (advance >= budget && budget > 0) {
             orderData.paymentStatus = order_entity_1.PaymentStatus.PAID;
         }
         else if (advance > 0) {
@@ -41,28 +83,31 @@ let OrdersService = class OrdersService {
         const order = this.orderRepository.create(orderData);
         return await this.orderRepository.save(order);
     }
-    async findAll() {
-        return await this.orderRepository.find({
-            relations: {
-                client: true,
-                category: true,
-            },
-            order: {
-                createdAt: 'DESC',
-            },
-        });
+    async findAll(options) {
+        const queryBuilder = this.orderRepository
+            .createQueryBuilder('order')
+            .leftJoinAndSelect('order.client', 'client')
+            .leftJoinAndSelect('order.category', 'category')
+            .orderBy('order.createdAt', 'DESC');
+        if (options?.query) {
+            const q = `%${options.query.trim().toLowerCase()}%`;
+            queryBuilder.andWhere('(LOWER(order.projectName) LIKE :q OR LOWER(order.invoiceNumber) LIKE :q OR LOWER(order.clientName) LIKE :q OR LOWER(client.name) LIKE :q OR LOWER(client.email) LIKE :q)', { q });
+        }
+        if (options?.status) {
+            queryBuilder.andWhere('order.status = :status', { status: options.status });
+        }
+        if (options?.paymentStatus) {
+            queryBuilder.andWhere('order.paymentStatus = :paymentStatus', {
+                paymentStatus: options.paymentStatus,
+            });
+        }
+        if (options?.clientId) {
+            queryBuilder.andWhere('client.id = :clientId', { clientId: options.clientId });
+        }
+        return await queryBuilder.getMany();
     }
     async findOneByClientId(clientId) {
-        return await this.orderRepository.find({
-            where: { client: { id: clientId } },
-            relations: {
-                client: true,
-                category: true,
-            },
-            order: {
-                createdAt: 'DESC',
-            },
-        });
+        return await this.findAll({ clientId });
     }
     async findOne(id) {
         const order = await this.orderRepository.findOne({
@@ -77,21 +122,57 @@ let OrdersService = class OrdersService {
         }
         return order;
     }
+    async findByInvoiceNumber(invoiceNumber) {
+        const order = await this.orderRepository.findOne({
+            where: { invoiceNumber },
+            relations: {
+                client: true,
+                category: true,
+            },
+        });
+        if (!order) {
+            throw new common_1.NotFoundException(`Order with invoice ${invoiceNumber} not found`);
+        }
+        return order;
+    }
     async update(id, updateOrderDto) {
         const order = await this.findOne(id);
         const updateData = { ...updateOrderDto };
-        if (updateOrderDto.clientId) {
-            updateData.client = { id: updateOrderDto.clientId };
+        if (updateOrderDto.clientId !== undefined) {
+            updateData.client = updateOrderDto.clientId ? { id: updateOrderDto.clientId } : null;
         }
-        if (updateOrderDto.categoryId) {
-            updateData.category = { id: updateOrderDto.categoryId };
+        if (updateOrderDto.categoryId !== undefined) {
+            updateData.category = updateOrderDto.categoryId ? { id: updateOrderDto.categoryId } : null;
+        }
+        if (updateOrderDto.subtotal !== undefined) {
+            updateData.subtotal = Number(updateOrderDto.subtotal);
+        }
+        if (updateOrderDto.discount !== undefined) {
+            updateData.discount = Number(updateOrderDto.discount);
+        }
+        if (updateOrderDto.tax !== undefined) {
+            updateData.tax = Number(updateOrderDto.tax);
         }
         if (updateOrderDto.advance !== undefined) {
-            updateData.advance = Number(order.advance) + Number(updateOrderDto.advance);
+            updateData.advance = Number(updateOrderDto.advance);
         }
-        const currentAdvance = updateData.advance !== undefined ? updateData.advance : Number(order.advance);
-        const currentBudget = updateData.budget !== undefined ? Number(updateData.budget) : Number(order.budget);
-        if (currentAdvance >= currentBudget && currentBudget > 0) {
+        const currentSubtotal = updateData.subtotal !== undefined ? Number(updateData.subtotal) : Number(order.subtotal || order.budget || 0);
+        const currentDiscount = updateData.discount !== undefined ? Number(updateData.discount) : Number(order.discount || 0);
+        const currentTax = updateData.tax !== undefined ? Number(updateData.tax) : Number(order.tax || 0);
+        if (updateOrderDto.budget !== undefined) {
+            updateData.budget = Number(updateOrderDto.budget);
+        }
+        else if (updateOrderDto.subtotal !== undefined ||
+            updateOrderDto.discount !== undefined ||
+            updateOrderDto.tax !== undefined) {
+            updateData.budget = Math.max(0, currentSubtotal - currentDiscount + currentTax);
+        }
+        const currentAdvance = updateData.advance !== undefined ? Number(updateData.advance) : Number(order.advance || 0);
+        const currentBudget = updateData.budget !== undefined ? Number(updateData.budget) : Number(order.budget || 0);
+        if (updateOrderDto.paymentStatus) {
+            updateData.paymentStatus = updateOrderDto.paymentStatus;
+        }
+        else if (currentAdvance >= currentBudget && currentBudget > 0) {
             updateData.paymentStatus = order_entity_1.PaymentStatus.PAID;
         }
         else if (currentAdvance > 0) {
@@ -102,6 +183,35 @@ let OrdersService = class OrdersService {
         }
         Object.assign(order, updateData);
         return await this.orderRepository.save(order);
+    }
+    async addPayment(id, recordPaymentDto) {
+        const order = await this.findOne(id);
+        const receiptNumber = recordPaymentDto.receiptNumber || this.generateReceiptNumber();
+        const newPayment = {
+            id: `pmt-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+            amount: Number(recordPaymentDto.amount),
+            paymentDate: recordPaymentDto.paymentDate || new Date().toISOString().split('T')[0],
+            paymentMethod: recordPaymentDto.paymentMethod || 'Bank Transfer',
+            transactionId: recordPaymentDto.transactionId || undefined,
+            receiptNumber,
+            note: recordPaymentDto.note || undefined,
+            createdAt: new Date().toISOString(),
+        };
+        const existingPayments = Array.isArray(order.payments) ? order.payments : [];
+        order.payments = [...existingPayments, newPayment];
+        order.advance = Number(order.advance || 0) + Number(recordPaymentDto.amount);
+        const total = Number(order.budget || 0);
+        if (order.advance >= total && total > 0) {
+            order.paymentStatus = order_entity_1.PaymentStatus.PAID;
+        }
+        else if (order.advance > 0) {
+            order.paymentStatus = order_entity_1.PaymentStatus.PARTIAL;
+        }
+        else {
+            order.paymentStatus = order_entity_1.PaymentStatus.UNPAID;
+        }
+        const savedOrder = await this.orderRepository.save(order);
+        return { order: savedOrder, payment: newPayment };
     }
     async remove(id) {
         const order = await this.findOne(id);

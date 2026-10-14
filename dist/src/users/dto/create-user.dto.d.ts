@@ -9,4 +9,6 @@ export declare class CreateUserDto {
     role?: UserRole;
     departmentId?: string;
     designationId?: string;
+    order?: number;
+    isPreview?: boolean;
 }

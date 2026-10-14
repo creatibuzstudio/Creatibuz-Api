@@ -15,12 +15,32 @@ export declare enum PaymentStatus {
 export declare class Order {
     id: string;
     projectName: string;
+    subtotal: number;
     budget: number;
     advance: number;
     paymentStatus: PaymentStatus;
     duration: string;
     status: OrderStatus;
+    invoiceNumber: string;
     projectProgress: string;
+    dueDate: Date;
+    discount: number;
+    tax: number;
+    payments?: Array<{
+        id: string;
+        amount: number;
+        paymentDate: string;
+        paymentMethod: string;
+        transactionId?: string;
+        receiptNumber?: string;
+        note?: string;
+        createdAt?: string;
+    }>;
+    notes: string;
+    clientName: string;
+    clientEmail: string;
+    clientPhone: string;
+    clientAddress: string;
     client: User;
     category: Category;
     createdAt: Date;
