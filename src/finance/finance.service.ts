@@ -403,11 +403,11 @@ export class FinanceService {
     const ceoShareRatio =
       leadershipPoolPercent > 0
         ? Number(((ceoEffectivePercent / leadershipPoolPercent) * 100).toFixed(2))
-        : 50;
+        : 60;
     const cooShareRatio =
       leadershipPoolPercent > 0
         ? Number(((cooEffectivePercent / leadershipPoolPercent) * 100).toFixed(2))
-        : 50;
+        : 40;
 
     const companyCostAllocated = totalOrderRevenue * (companyCostPercent / 100);
     const companyCostNetBalance = Math.max(0, companyCostAllocated - totalApprovedExpenses);
