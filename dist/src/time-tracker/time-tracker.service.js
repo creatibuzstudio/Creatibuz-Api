@@ -87,13 +87,19 @@ let TimeTrackerService = TimeTrackerService_1 = class TimeTrackerService {
         if (!dto.photo) {
             throw new common_1.BadRequestException('Webcam verification photo is required to stop time tracking');
         }
-        const session = await this.timeLogRepo.findOne({
-            where: dto.sessionId
-                ? { id: dto.sessionId }
-                : { userId: dto.userId, status: time_log_entity_1.TimeLogStatus.RUNNING },
-            order: { clockInTime: 'DESC' },
-        });
-        if (!session || session.status !== time_log_entity_1.TimeLogStatus.RUNNING) {
+        let session = null;
+        if (dto.sessionId) {
+            session = await this.timeLogRepo.findOne({
+                where: { id: dto.sessionId, status: time_log_entity_1.TimeLogStatus.RUNNING },
+            });
+        }
+        if (!session && dto.userId) {
+            session = await this.timeLogRepo.findOne({
+                where: { userId: dto.userId, status: time_log_entity_1.TimeLogStatus.RUNNING },
+                order: { clockInTime: 'DESC' },
+            });
+        }
+        if (!session) {
             throw new common_1.BadRequestException('No active running time session found to clock out');
         }
         const now = new Date();

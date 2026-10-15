@@ -91,15 +91,21 @@ export class TimeTrackerService implements OnModuleInit {
       throw new BadRequestException('Webcam verification photo is required to stop time tracking');
     }
 
-    // Find active running session
-    const session = await this.timeLogRepo.findOne({
-      where: dto.sessionId
-        ? { id: dto.sessionId }
-        : { userId: dto.userId, status: TimeLogStatus.RUNNING },
-      order: { clockInTime: 'DESC' },
-    });
+    // Find active running session: first by sessionId if provided and running, else fallback to latest running for user
+    let session: TimeLog | null = null;
+    if (dto.sessionId) {
+      session = await this.timeLogRepo.findOne({
+        where: { id: dto.sessionId, status: TimeLogStatus.RUNNING },
+      });
+    }
+    if (!session && dto.userId) {
+      session = await this.timeLogRepo.findOne({
+        where: { userId: dto.userId, status: TimeLogStatus.RUNNING },
+        order: { clockInTime: 'DESC' },
+      });
+    }
 
-    if (!session || session.status !== TimeLogStatus.RUNNING) {
+    if (!session) {
       throw new BadRequestException('No active running time session found to clock out');
     }
 
