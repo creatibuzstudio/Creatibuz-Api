@@ -125,4 +125,8 @@ export declare class TimeTrackerService implements OnModuleInit {
     private getUserDurationForDate;
     private formatSecondsToHoursMinutes;
     private seedInitialTimeLogsIfEmpty;
+    deleteSession(id: string): Promise<{
+        success: boolean;
+        id: string;
+    }>;
 }

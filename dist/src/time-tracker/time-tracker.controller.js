@@ -96,6 +96,14 @@ let TimeTrackerController = class TimeTrackerController {
             data,
         };
     }
+    async deleteSession(id) {
+        const data = await this.timeTrackerService.deleteSession(id);
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'Time tracking session deleted successfully',
+            data,
+        };
+    }
 };
 exports.TimeTrackerController = TimeTrackerController;
 __decorate([
@@ -149,6 +157,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], TimeTrackerController.prototype, "getAdminDailyReport", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], TimeTrackerController.prototype, "deleteSession", null);
 exports.TimeTrackerController = TimeTrackerController = __decorate([
     (0, common_1.Controller)('time-tracker'),
     __metadata("design:paramtypes", [time_tracker_service_1.TimeTrackerService])

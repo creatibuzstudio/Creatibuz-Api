@@ -421,6 +421,15 @@ let TimeTrackerService = TimeTrackerService_1 = class TimeTrackerService {
         }
         this.logger.log('Initial employee work attendance sessions successfully seeded.');
     }
+    async deleteSession(id) {
+        const session = await this.timeLogRepo.findOne({ where: { id } });
+        if (!session) {
+            throw new common_1.NotFoundException(`Time log session with ID ${id} not found`);
+        }
+        await this.timeLogRepo.remove(session);
+        this.logger.log(`Time log session ${id} deleted by executive user`);
+        return { success: true, id };
+    }
 };
 exports.TimeTrackerService = TimeTrackerService;
 exports.TimeTrackerService = TimeTrackerService = TimeTrackerService_1 = __decorate([

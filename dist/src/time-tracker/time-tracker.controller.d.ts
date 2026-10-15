@@ -144,4 +144,12 @@ export declare class TimeTrackerController {
             }[];
         };
     }>;
+    deleteSession(id: string): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+        data: {
+            success: boolean;
+            id: string;
+        };
+    }>;
 }
