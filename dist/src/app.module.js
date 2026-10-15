@@ -33,6 +33,7 @@ const path_1 = require("path");
 const uploads_module_1 = require("./uploads/uploads.module");
 const finance_module_1 = require("./finance/finance.module");
 const payroll_module_1 = require("./payroll/payroll.module");
+const activity_logs_module_1 = require("./activity-logs/activity-logs.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -74,6 +75,7 @@ exports.AppModule = AppModule = __decorate([
             uploads_module_1.UploadsModule,
             finance_module_1.FinanceModule,
             payroll_module_1.PayrollModule,
+            activity_logs_module_1.ActivityLogsModule,
             serve_static_1.ServeStaticModule.forRoot({
                 rootPath: (0, path_1.join)(__dirname, '..', 'uploads'),
                 serveRoot: '/cdn/',
