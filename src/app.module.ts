@@ -26,6 +26,7 @@ import { UploadsModule } from './uploads/uploads.module';
 import { FinanceModule } from './finance/finance.module';
 import { PayrollModule } from './payroll/payroll.module';
 import { ActivityLogsModule } from './activity-logs/activity-logs.module';
+import { TimeTrackerModule } from './time-tracker/time-tracker.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { ActivityLogsModule } from './activity-logs/activity-logs.module';
     FinanceModule,
     PayrollModule,
     ActivityLogsModule,
+    TimeTrackerModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/cdn/',
