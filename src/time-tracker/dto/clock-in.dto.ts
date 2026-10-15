@@ -44,4 +44,7 @@ export class ClockInDto {
   @IsOptional()
   @IsString()
   device?: string;
+
+  @IsOptional()
+  faceMatchScore?: number;
 }

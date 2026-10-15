@@ -38,6 +38,7 @@ export declare class TimeTrackerController {
             clockInPhoto: string;
             clockOutPhoto: string;
             durationSeconds: number;
+            faceMatchScore: number;
             note: string;
             status: string;
             ipAddress: string;
@@ -86,6 +87,7 @@ export declare class TimeTrackerController {
             clockInPhoto: string;
             clockOutPhoto: string;
             durationSeconds: number;
+            faceMatchScore: number;
             note: string;
             status: string;
             ipAddress: string;

@@ -5,4 +5,5 @@ export declare class ClockOutDto {
     note?: string;
     ipAddress?: string;
     device?: string;
+    faceMatchScore?: number;
 }

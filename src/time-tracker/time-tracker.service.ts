@@ -49,6 +49,13 @@ export class TimeTrackerService implements OnModuleInit {
       return existingRunning;
     }
 
+    // Enforce 40% face match verification threshold
+    if (dto.faceMatchScore !== undefined && dto.faceMatchScore < 40) {
+      throw new BadRequestException(
+        `Face verification failed: Captured camera photo matches only ${dto.faceMatchScore}% with registered profile photo. A minimum 40% match is mandatory to clock in.`,
+      );
+    }
+
     // Lookup user details if missing
     let user = null;
     try {
@@ -57,6 +64,14 @@ export class TimeTrackerService implements OnModuleInit {
         relations: { department: true, designation: true },
       });
     } catch {}
+
+    // If user has no custom profile picture yet, register this verified photo as their benchmark
+    if (user && (!user.picture || user.picture.includes('ui-avatars.com'))) {
+      try {
+        user.picture = dto.photo;
+        await this.userRepo.save(user);
+      } catch {}
+    }
 
     const now = new Date();
     const todayDate = now.toISOString().split('T')[0];
@@ -73,6 +88,7 @@ export class TimeTrackerService implements OnModuleInit {
       clockInTime: now,
       clockInPhoto: dto.photo,
       durationSeconds: 0,
+      faceMatchScore: dto.faceMatchScore !== undefined ? dto.faceMatchScore : 100,
       note: dto.note || 'Work shift started with webcam verification',
       status: TimeLogStatus.RUNNING,
       ipAddress: dto.ipAddress || '127.0.0.1',
@@ -109,6 +125,13 @@ export class TimeTrackerService implements OnModuleInit {
       throw new BadRequestException('No active running time session found to clock out');
     }
 
+    // Enforce 40% face match verification threshold
+    if (dto.faceMatchScore !== undefined && dto.faceMatchScore < 40) {
+      throw new BadRequestException(
+        `Face verification failed: Captured camera photo matches only ${dto.faceMatchScore}% with registered profile photo. A minimum 40% match is mandatory to clock out.`,
+      );
+    }
+
     const now = new Date();
     const elapsedSeconds = Math.max(
       1,
@@ -119,6 +142,9 @@ export class TimeTrackerService implements OnModuleInit {
     session.clockOutPhoto = dto.photo;
     session.durationSeconds = elapsedSeconds;
     session.status = TimeLogStatus.COMPLETED;
+    if (dto.faceMatchScore !== undefined) {
+      session.faceMatchScore = dto.faceMatchScore;
+    }
     if (dto.note) {
       session.note = session.note ? `${session.note} • ${dto.note}` : dto.note;
     }

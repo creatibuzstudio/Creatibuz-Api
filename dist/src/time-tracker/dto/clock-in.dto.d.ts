@@ -10,4 +10,5 @@ export declare class ClockInDto {
     note?: string;
     ipAddress?: string;
     device?: string;
+    faceMatchScore?: number;
 }

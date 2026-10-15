@@ -50,6 +50,9 @@ export class TimeLog {
   @Column({ type: 'int', default: 0 })
   durationSeconds: number;
 
+  @Column({ type: 'int', default: 100 })
+  faceMatchScore: number;
+
   @Column({ type: 'text', nullable: true })
   note: string;
 

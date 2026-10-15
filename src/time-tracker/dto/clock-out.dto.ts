@@ -24,4 +24,7 @@ export class ClockOutDto {
   @IsOptional()
   @IsString()
   device?: string;
+
+  @IsOptional()
+  faceMatchScore?: number;
 }

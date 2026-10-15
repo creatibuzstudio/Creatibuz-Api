@@ -69,4 +69,8 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ClockInDto.prototype, "device", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], ClockInDto.prototype, "faceMatchScore", void 0);
 //# sourceMappingURL=clock-in.dto.js.map

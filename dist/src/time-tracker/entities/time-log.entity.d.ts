@@ -18,6 +18,7 @@ export declare class TimeLog {
     clockInPhoto: string;
     clockOutPhoto: string;
     durationSeconds: number;
+    faceMatchScore: number;
     note: string;
     status: string;
     ipAddress: string;

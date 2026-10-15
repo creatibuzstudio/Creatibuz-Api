@@ -51,6 +51,9 @@ let TimeTrackerService = TimeTrackerService_1 = class TimeTrackerService {
         if (existingRunning) {
             return existingRunning;
         }
+        if (dto.faceMatchScore !== undefined && dto.faceMatchScore < 40) {
+            throw new common_1.BadRequestException(`Face verification failed: Captured camera photo matches only ${dto.faceMatchScore}% with registered profile photo. A minimum 40% match is mandatory to clock in.`);
+        }
         let user = null;
         try {
             user = await this.userRepo.findOne({
@@ -59,6 +62,13 @@ let TimeTrackerService = TimeTrackerService_1 = class TimeTrackerService {
             });
         }
         catch { }
+        if (user && (!user.picture || user.picture.includes('ui-avatars.com'))) {
+            try {
+                user.picture = dto.photo;
+                await this.userRepo.save(user);
+            }
+            catch { }
+        }
         const now = new Date();
         const todayDate = now.toISOString().split('T')[0];
         const session = this.timeLogRepo.create({
@@ -73,6 +83,7 @@ let TimeTrackerService = TimeTrackerService_1 = class TimeTrackerService {
             clockInTime: now,
             clockInPhoto: dto.photo,
             durationSeconds: 0,
+            faceMatchScore: dto.faceMatchScore !== undefined ? dto.faceMatchScore : 100,
             note: dto.note || 'Work shift started with webcam verification',
             status: time_log_entity_1.TimeLogStatus.RUNNING,
             ipAddress: dto.ipAddress || '127.0.0.1',
@@ -102,12 +113,18 @@ let TimeTrackerService = TimeTrackerService_1 = class TimeTrackerService {
         if (!session) {
             throw new common_1.BadRequestException('No active running time session found to clock out');
         }
+        if (dto.faceMatchScore !== undefined && dto.faceMatchScore < 40) {
+            throw new common_1.BadRequestException(`Face verification failed: Captured camera photo matches only ${dto.faceMatchScore}% with registered profile photo. A minimum 40% match is mandatory to clock out.`);
+        }
         const now = new Date();
         const elapsedSeconds = Math.max(1, Math.round((now.getTime() - new Date(session.clockInTime).getTime()) / 1000));
         session.clockOutTime = now;
         session.clockOutPhoto = dto.photo;
         session.durationSeconds = elapsedSeconds;
         session.status = time_log_entity_1.TimeLogStatus.COMPLETED;
+        if (dto.faceMatchScore !== undefined) {
+            session.faceMatchScore = dto.faceMatchScore;
+        }
         if (dto.note) {
             session.note = session.note ? `${session.note} • ${dto.note}` : dto.note;
         }
