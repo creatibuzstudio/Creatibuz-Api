@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TimeLog, TimeLogStatus } from './entities/time-log.entity';
@@ -501,5 +501,17 @@ export class TimeTrackerService implements OnModuleInit {
     }
 
     this.logger.log('Initial employee work attendance sessions successfully seeded.');
+  }
+
+  // 8. Delete time log session (CEO / COO / Admin)
+  async deleteSession(id: string): Promise<{ success: boolean; id: string }> {
+    const session = await this.timeLogRepo.findOne({ where: { id } });
+    if (!session) {
+      throw new NotFoundException(`Time log session with ID ${id} not found`);
+    }
+
+    await this.timeLogRepo.remove(session);
+    this.logger.log(`Time log session ${id} deleted by executive user`);
+    return { success: true, id };
   }
 }

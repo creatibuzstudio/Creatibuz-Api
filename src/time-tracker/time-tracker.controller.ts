@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
+  Param,
   Post,
   Query,
   Req,
@@ -116,6 +118,17 @@ export class TimeTrackerController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Daily attendance and 6-hour compliance report retrieved',
+      data,
+    };
+  }
+
+  // 8. Delete time tracking session (CEO / COO / Admin)
+  @Delete(':id')
+  async deleteSession(@Param('id') id: string) {
+    const data = await this.timeTrackerService.deleteSession(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Time tracking session deleted successfully',
       data,
     };
   }
