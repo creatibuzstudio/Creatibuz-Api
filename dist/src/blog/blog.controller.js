@@ -30,6 +30,12 @@ let BlogController = class BlogController {
     findBySlug(slug) {
         return this.blogService.findBySlug(slug);
     }
+    incrementViewsBySlug(slug) {
+        return this.blogService.incrementViews(slug);
+    }
+    incrementViewsById(id) {
+        return this.blogService.incrementViews(id);
+    }
     findOne(id) {
         return this.blogService.findOne(id);
     }
@@ -61,6 +67,20 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], BlogController.prototype, "findBySlug", null);
+__decorate([
+    (0, common_1.Post)('slug/:slug/view'),
+    __param(0, (0, common_1.Param)('slug')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BlogController.prototype, "incrementViewsBySlug", null);
+__decorate([
+    (0, common_1.Post)(':id/view'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BlogController.prototype, "incrementViewsById", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

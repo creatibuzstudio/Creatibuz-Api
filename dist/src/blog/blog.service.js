@@ -81,7 +81,14 @@ let BlogService = class BlogService {
         if (!blog) {
             throw new common_1.NotFoundException(`Blog with slug '${slug}' not found`);
         }
+        blog.views = (Number(blog.views) || 0) + 1;
+        await this.blogRepository.save(blog);
         return blog;
+    }
+    async incrementViews(idOrSlug) {
+        const blog = await this.findOne(idOrSlug);
+        blog.views = (Number(blog.views) || 0) + 1;
+        return await this.blogRepository.save(blog);
     }
     async findOne(idOrSlug) {
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idOrSlug);

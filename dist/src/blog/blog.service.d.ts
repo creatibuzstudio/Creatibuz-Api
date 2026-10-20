@@ -10,6 +10,7 @@ export declare class BlogService {
     create(createBlogDto: CreateBlogDto): Promise<Blog>;
     findAll(): Promise<Blog[]>;
     findBySlug(slug: string): Promise<Blog>;
+    incrementViews(idOrSlug: string): Promise<Blog>;
     findOne(idOrSlug: string): Promise<Blog>;
     update(id: string, updateBlogDto: UpdateBlogDto): Promise<Blog>;
     remove(id: string): Promise<void>;

@@ -7,6 +7,8 @@ export declare class BlogController {
     create(createBlogDto: CreateBlogDto): Promise<import("./entities/blog.entity").Blog>;
     findAll(): Promise<import("./entities/blog.entity").Blog[]>;
     findBySlug(slug: string): Promise<import("./entities/blog.entity").Blog>;
+    incrementViewsBySlug(slug: string): Promise<import("./entities/blog.entity").Blog>;
+    incrementViewsById(id: string): Promise<import("./entities/blog.entity").Blog>;
     findOne(id: string): Promise<import("./entities/blog.entity").Blog>;
     update(id: string, updateBlogDto: UpdateBlogDto): Promise<import("./entities/blog.entity").Blog>;
     remove(id: string): Promise<void>;

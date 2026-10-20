@@ -8,6 +8,7 @@ import { CompanyExpense } from '../finance/entities/company-expense.entity';
 import { FinancialSetting } from '../finance/entities/financial-setting.entity';
 import { Blog } from '../blog/entities/blog.entity';
 import { Review } from '../review/entities/review.entity';
+import { WebsiteVisitor } from './entities/visitor.entity';
 export declare class StatsService {
     private casestudyRepository;
     private userRepository;
@@ -18,12 +19,38 @@ export declare class StatsService {
     private settingRepository;
     private blogRepository;
     private reviewRepository;
-    constructor(casestudyRepository: Repository<Casestudy>, userRepository: Repository<User>, partnerRepository: Repository<Partner>, orderRepository: Repository<Order>, capitalRepository: Repository<InvestorCapital>, expenseRepository: Repository<CompanyExpense>, settingRepository: Repository<FinancialSetting>, blogRepository: Repository<Blog>, reviewRepository: Repository<Review>);
+    private visitorRepository;
+    constructor(casestudyRepository: Repository<Casestudy>, userRepository: Repository<User>, partnerRepository: Repository<Partner>, orderRepository: Repository<Order>, capitalRepository: Repository<InvestorCapital>, expenseRepository: Repository<CompanyExpense>, settingRepository: Repository<FinancialSetting>, blogRepository: Repository<Blog>, reviewRepository: Repository<Review>, visitorRepository: Repository<WebsiteVisitor>);
+    trackVisit(data: {
+        ipAddress?: string;
+        userAgent?: string;
+        pagePath?: string;
+        eventType?: string;
+        blogSlug?: string;
+    }): Promise<{
+        success: boolean;
+        error?: undefined;
+    } | {
+        success: boolean;
+        error: any;
+    }>;
     getStats(): Promise<{
         projectDeliveries: number;
         inHouseExperts: number;
         satisfiedClients: number;
         businessPartners: number;
+        totalWebsiteVisitors: number;
+        todayWebsiteVisitors: number;
+        totalBlogReaders: number;
+        todayBlogVisitors: number;
+        uniqueVisitorsCount: number;
+        topViewedBlogs: Blog[];
+        visitorTrend: {
+            date: string;
+            day: string;
+            websiteVisitors: number;
+            blogVisitors: number;
+        }[];
         overview: {
             totalRevenue: number;
             totalInvoiced: number;
@@ -47,6 +74,12 @@ export declare class StatsService {
             totalCaseStudies: number;
             businessPartners: number;
             totalReviews: number;
+            totalWebsiteVisitors: number;
+            todayWebsiteVisitors: number;
+            totalBlogReaders: number;
+            todayBlogVisitors: number;
+            uniqueVisitorsCount: number;
+            topViewedBlogs: Blog[];
             pools: {
                 companyCost: {
                     percent: number;
@@ -85,6 +118,12 @@ export declare class StatsService {
                 percent: number;
                 amount: number;
                 color: string;
+            }[];
+            visitorTrend: {
+                date: string;
+                day: string;
+                websiteVisitors: number;
+                blogVisitors: number;
             }[];
         };
         recentOrders: {

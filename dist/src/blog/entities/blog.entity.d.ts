@@ -14,6 +14,7 @@ export declare class Blog {
     metaTitle: string;
     metaDescription: string;
     metaKeywords: string;
+    views: number;
     createdAt: Date;
     updatedAt: Date;
 }

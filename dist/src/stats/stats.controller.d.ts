@@ -7,6 +7,18 @@ export declare class StatsController {
         inHouseExperts: number;
         satisfiedClients: number;
         businessPartners: number;
+        totalWebsiteVisitors: number;
+        todayWebsiteVisitors: number;
+        totalBlogReaders: number;
+        todayBlogVisitors: number;
+        uniqueVisitorsCount: number;
+        topViewedBlogs: import("../blog/entities/blog.entity").Blog[];
+        visitorTrend: {
+            date: string;
+            day: string;
+            websiteVisitors: number;
+            blogVisitors: number;
+        }[];
         overview: {
             totalRevenue: number;
             totalInvoiced: number;
@@ -30,6 +42,12 @@ export declare class StatsController {
             totalCaseStudies: number;
             businessPartners: number;
             totalReviews: number;
+            totalWebsiteVisitors: number;
+            todayWebsiteVisitors: number;
+            totalBlogReaders: number;
+            todayBlogVisitors: number;
+            uniqueVisitorsCount: number;
+            topViewedBlogs: import("../blog/entities/blog.entity").Blog[];
             pools: {
                 companyCost: {
                     percent: number;
@@ -68,6 +86,12 @@ export declare class StatsController {
                 percent: number;
                 amount: number;
                 color: string;
+            }[];
+            visitorTrend: {
+                date: string;
+                day: string;
+                websiteVisitors: number;
+                blogVisitors: number;
             }[];
         };
         recentOrders: {
@@ -124,6 +148,18 @@ export declare class StatsController {
         inHouseExperts: number;
         satisfiedClients: number;
         businessPartners: number;
+        totalWebsiteVisitors: number;
+        todayWebsiteVisitors: number;
+        totalBlogReaders: number;
+        todayBlogVisitors: number;
+        uniqueVisitorsCount: number;
+        topViewedBlogs: import("../blog/entities/blog.entity").Blog[];
+        visitorTrend: {
+            date: string;
+            day: string;
+            websiteVisitors: number;
+            blogVisitors: number;
+        }[];
         overview: {
             totalRevenue: number;
             totalInvoiced: number;
@@ -147,6 +183,12 @@ export declare class StatsController {
             totalCaseStudies: number;
             businessPartners: number;
             totalReviews: number;
+            totalWebsiteVisitors: number;
+            todayWebsiteVisitors: number;
+            totalBlogReaders: number;
+            todayBlogVisitors: number;
+            uniqueVisitorsCount: number;
+            topViewedBlogs: import("../blog/entities/blog.entity").Blog[];
             pools: {
                 companyCost: {
                     percent: number;
@@ -185,6 +227,12 @@ export declare class StatsController {
                 percent: number;
                 amount: number;
                 color: string;
+            }[];
+            visitorTrend: {
+                date: string;
+                day: string;
+                websiteVisitors: number;
+                blogVisitors: number;
             }[];
         };
         recentOrders: {
@@ -241,6 +289,18 @@ export declare class StatsController {
         inHouseExperts: number;
         satisfiedClients: number;
         businessPartners: number;
+        totalWebsiteVisitors: number;
+        todayWebsiteVisitors: number;
+        totalBlogReaders: number;
+        todayBlogVisitors: number;
+        uniqueVisitorsCount: number;
+        topViewedBlogs: import("../blog/entities/blog.entity").Blog[];
+        visitorTrend: {
+            date: string;
+            day: string;
+            websiteVisitors: number;
+            blogVisitors: number;
+        }[];
         overview: {
             totalRevenue: number;
             totalInvoiced: number;
@@ -264,6 +324,12 @@ export declare class StatsController {
             totalCaseStudies: number;
             businessPartners: number;
             totalReviews: number;
+            totalWebsiteVisitors: number;
+            todayWebsiteVisitors: number;
+            totalBlogReaders: number;
+            todayBlogVisitors: number;
+            uniqueVisitorsCount: number;
+            topViewedBlogs: import("../blog/entities/blog.entity").Blog[];
             pools: {
                 companyCost: {
                     percent: number;
@@ -302,6 +368,12 @@ export declare class StatsController {
                 percent: number;
                 amount: number;
                 color: string;
+            }[];
+            visitorTrend: {
+                date: string;
+                day: string;
+                websiteVisitors: number;
+                blogVisitors: number;
             }[];
         };
         recentOrders: {
@@ -352,5 +424,16 @@ export declare class StatsController {
             relativeTime: string;
             isNew: boolean;
         }[];
+    }>;
+    trackVisit(req: any, body: {
+        path?: string;
+        eventType?: string;
+        blogSlug?: string;
+    }): Promise<{
+        success: boolean;
+        error?: undefined;
+    } | {
+        success: boolean;
+        error: any;
     }>;
 }

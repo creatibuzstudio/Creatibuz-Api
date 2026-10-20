@@ -25,8 +25,9 @@ const company_expense_entity_1 = require("../finance/entities/company-expense.en
 const financial_setting_entity_1 = require("../finance/entities/financial-setting.entity");
 const blog_entity_1 = require("../blog/entities/blog.entity");
 const review_entity_1 = require("../review/entities/review.entity");
+const visitor_entity_1 = require("./entities/visitor.entity");
 let StatsService = class StatsService {
-    constructor(casestudyRepository, userRepository, partnerRepository, orderRepository, capitalRepository, expenseRepository, settingRepository, blogRepository, reviewRepository) {
+    constructor(casestudyRepository, userRepository, partnerRepository, orderRepository, capitalRepository, expenseRepository, settingRepository, blogRepository, reviewRepository, visitorRepository) {
         this.casestudyRepository = casestudyRepository;
         this.userRepository = userRepository;
         this.partnerRepository = partnerRepository;
@@ -36,6 +37,26 @@ let StatsService = class StatsService {
         this.settingRepository = settingRepository;
         this.blogRepository = blogRepository;
         this.reviewRepository = reviewRepository;
+        this.visitorRepository = visitorRepository;
+    }
+    async trackVisit(data) {
+        try {
+            const visitor = this.visitorRepository.create({
+                ipAddress: data.ipAddress || '127.0.0.1',
+                userAgent: data.userAgent ? String(data.userAgent).slice(0, 300) : 'Web Browser',
+                pagePath: data.pagePath || '/',
+                eventType: data.eventType || (data.blogSlug ? 'BLOG_VIEW' : 'PAGE_VIEW'),
+                blogSlug: data.blogSlug || null,
+            });
+            await this.visitorRepository.save(visitor);
+            if (data.blogSlug) {
+                await this.blogRepository.increment({ slug: data.blogSlug }, 'views', 1);
+            }
+            return { success: true };
+        }
+        catch (error) {
+            return { success: false, error: error?.message || 'Failed to record visit' };
+        }
     }
     async getStats() {
         const projectDeliveries = await this.casestudyRepository.count();
@@ -367,11 +388,88 @@ let StatsService = class StatsService {
         })
             .sort((a, b) => a.daysAgo - b.daysAgo)
             .slice(0, 8);
+        const totalVisitorRecords = await this.visitorRepository.count();
+        const todayMidnight = new Date();
+        todayMidnight.setHours(0, 0, 0, 0);
+        const todayWebsiteVisitors = await this.visitorRepository
+            .createQueryBuilder('v')
+            .where('v.createdAt >= :today', { today: todayMidnight })
+            .getCount();
+        const totalBlogVisits = await this.visitorRepository
+            .createQueryBuilder('v')
+            .where("v.eventType = 'BLOG_VIEW'")
+            .getCount();
+        const todayBlogVisitors = await this.visitorRepository
+            .createQueryBuilder('v')
+            .where("v.eventType = 'BLOG_VIEW' AND v.createdAt >= :today", { today: todayMidnight })
+            .getCount();
+        const blogViewsRaw = await this.blogRepository
+            .createQueryBuilder('b')
+            .select('SUM(b.views)', 'totalViews')
+            .getRawOne();
+        const totalBlogViews = Number(blogViewsRaw?.totalViews || 0);
+        const uniqueRaw = await this.visitorRepository
+            .createQueryBuilder('v')
+            .select('COUNT(DISTINCT v.ipAddress)', 'uniqueCount')
+            .getRawOne();
+        const uniqueVisitorsCount = Number(uniqueRaw?.uniqueCount || 0);
+        const topViewedBlogs = await this.blogRepository.find({
+            order: { views: 'DESC' },
+            take: 5,
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                views: true,
+                createdAt: true,
+                coverImage: true,
+            },
+        });
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const last7DaysTrend = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            last7DaysTrend.push({
+                date: dateStr,
+                day: dayNames[d.getDay()],
+                websiteVisitors: 0,
+                blogVisitors: 0,
+            });
+        }
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        sevenDaysAgo.setHours(0, 0, 0, 0);
+        const recentVisits = await this.visitorRepository
+            .createQueryBuilder('v')
+            .where('v.createdAt >= :since', { since: sevenDaysAgo })
+            .getMany();
+        recentVisits.forEach((visit) => {
+            const vd = new Date(visit.createdAt);
+            const vDateStr = `${vd.getFullYear()}-${String(vd.getMonth() + 1).padStart(2, '0')}-${String(vd.getDate()).padStart(2, '0')}`;
+            const entry = last7DaysTrend.find((item) => item.date === vDateStr);
+            if (entry) {
+                entry.websiteVisitors += 1;
+                if (visit.eventType === 'BLOG_VIEW' || visit.blogSlug) {
+                    entry.blogVisitors += 1;
+                }
+            }
+        });
+        const totalWebsiteVisitorsCount = totalVisitorRecords;
+        const totalBlogReadersCount = Math.max(totalBlogVisits, totalBlogViews);
         return {
-            projectDeliveries: Math.max(projectDeliveries, 50),
-            inHouseExperts: Math.max(inHouseExperts, 15),
+            projectDeliveries: projectDeliveries > 0 ? projectDeliveries : (completedOrders > 0 ? completedOrders : 400),
+            inHouseExperts: inHouseExperts > 0 ? inHouseExperts : 15,
             satisfiedClients: 99,
-            businessPartners: Math.max(businessPartners, 5),
+            businessPartners: businessPartners > 0 ? businessPartners : 40,
+            totalWebsiteVisitors: totalWebsiteVisitorsCount,
+            todayWebsiteVisitors,
+            totalBlogReaders: totalBlogReadersCount,
+            todayBlogVisitors,
+            uniqueVisitorsCount,
+            topViewedBlogs,
+            visitorTrend: last7DaysTrend,
             overview: {
                 totalRevenue: Number(totalRevenue.toFixed(2)),
                 totalInvoiced: Number(totalInvoiced.toFixed(2)),
@@ -395,6 +493,12 @@ let StatsService = class StatsService {
                 totalCaseStudies: projectDeliveries,
                 businessPartners,
                 totalReviews,
+                totalWebsiteVisitors: totalWebsiteVisitorsCount,
+                todayWebsiteVisitors,
+                totalBlogReaders: totalBlogReadersCount,
+                todayBlogVisitors,
+                uniqueVisitorsCount,
+                topViewedBlogs,
                 pools: {
                     companyCost: {
                         percent: companyCostPercent,
@@ -420,6 +524,7 @@ let StatsService = class StatsService {
                 revenueTrend: chartTrend,
                 orderStatusDistribution: finalOrderStatusData,
                 profitDistribution,
+                visitorTrend: last7DaysTrend,
             },
             recentOrders,
             runningMonthName,
@@ -440,7 +545,9 @@ exports.StatsService = StatsService = __decorate([
     __param(6, (0, typeorm_1.InjectRepository)(financial_setting_entity_1.FinancialSetting)),
     __param(7, (0, typeorm_1.InjectRepository)(blog_entity_1.Blog)),
     __param(8, (0, typeorm_1.InjectRepository)(review_entity_1.Review)),
+    __param(9, (0, typeorm_1.InjectRepository)(visitor_entity_1.WebsiteVisitor)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,

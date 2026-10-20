@@ -75,6 +75,10 @@ __decorate([
     __metadata("design:type", String)
 ], Blog.prototype, "metaKeywords", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'int', default: 0 }),
+    __metadata("design:type", Number)
+], Blog.prototype, "views", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], Blog.prototype, "createdAt", void 0);

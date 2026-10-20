@@ -10,6 +10,7 @@ import { CompanyExpense, ExpenseStatus } from '../finance/entities/company-expen
 import { FinancialSetting } from '../finance/entities/financial-setting.entity';
 import { Blog } from '../blog/entities/blog.entity';
 import { Review } from '../review/entities/review.entity';
+import { WebsiteVisitor } from './entities/visitor.entity';
 
 @Injectable()
 export class StatsService {
@@ -32,7 +33,37 @@ export class StatsService {
     private blogRepository: Repository<Blog>,
     @InjectRepository(Review)
     private reviewRepository: Repository<Review>,
+    @InjectRepository(WebsiteVisitor)
+    private visitorRepository: Repository<WebsiteVisitor>,
   ) {}
+
+  async trackVisit(data: {
+    ipAddress?: string;
+    userAgent?: string;
+    pagePath?: string;
+    eventType?: string;
+    blogSlug?: string;
+  }) {
+    try {
+      const visitor = this.visitorRepository.create({
+        ipAddress: data.ipAddress || '127.0.0.1',
+        userAgent: data.userAgent ? String(data.userAgent).slice(0, 300) : 'Web Browser',
+        pagePath: data.pagePath || '/',
+        eventType: data.eventType || (data.blogSlug ? 'BLOG_VIEW' : 'PAGE_VIEW'),
+        blogSlug: data.blogSlug || null,
+      });
+      await this.visitorRepository.save(visitor);
+
+      // If viewing a blog, increment view count for this blog
+      if (data.blogSlug) {
+        await this.blogRepository.increment({ slug: data.blogSlug }, 'views', 1);
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error?.message || 'Failed to record visit' };
+    }
+  }
 
   async getStats() {
     // 1. Basic counts
@@ -421,12 +452,117 @@ export class StatsService {
       .sort((a, b) => a.daysAgo - b.daysAgo)
       .slice(0, 8);
 
+    // 12. Website & Blog Visitors Analytics
+    const totalVisitorRecords = await this.visitorRepository.count();
+
+    // Start of today (midnight)
+    const todayMidnight = new Date();
+    todayMidnight.setHours(0, 0, 0, 0);
+
+    const todayWebsiteVisitors = await this.visitorRepository
+      .createQueryBuilder('v')
+      .where('v.createdAt >= :today', { today: todayMidnight })
+      .getCount();
+
+    const totalBlogVisits = await this.visitorRepository
+      .createQueryBuilder('v')
+      .where("v.eventType = 'BLOG_VIEW'")
+      .getCount();
+
+    const todayBlogVisitors = await this.visitorRepository
+      .createQueryBuilder('v')
+      .where("v.eventType = 'BLOG_VIEW' AND v.createdAt >= :today", { today: todayMidnight })
+      .getCount();
+
+    // Sum of views from all blogs
+    const blogViewsRaw = await this.blogRepository
+      .createQueryBuilder('b')
+      .select('SUM(b.views)', 'totalViews')
+      .getRawOne();
+    const totalBlogViews = Number(blogViewsRaw?.totalViews || 0);
+
+    // Unique visitors by IP
+    const uniqueRaw = await this.visitorRepository
+      .createQueryBuilder('v')
+      .select('COUNT(DISTINCT v.ipAddress)', 'uniqueCount')
+      .getRawOne();
+    const uniqueVisitorsCount = Number(uniqueRaw?.uniqueCount || 0);
+
+    // Top 5 viewed blogs
+    const topViewedBlogs = await this.blogRepository.find({
+      order: { views: 'DESC' },
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        views: true,
+        createdAt: true,
+        coverImage: true,
+      },
+    });
+
+    // 7-day visitor trend
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const last7DaysTrend: Array<{
+      date: string;
+      day: string;
+      websiteVisitors: number;
+      blogVisitors: number;
+    }> = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+      last7DaysTrend.push({
+        date: dateStr,
+        day: dayNames[d.getDay()],
+        websiteVisitors: 0,
+        blogVisitors: 0,
+      });
+    }
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const recentVisits = await this.visitorRepository
+      .createQueryBuilder('v')
+      .where('v.createdAt >= :since', { since: sevenDaysAgo })
+      .getMany();
+
+    recentVisits.forEach((visit) => {
+      const vd = new Date(visit.createdAt);
+      const vDateStr = `${vd.getFullYear()}-${String(vd.getMonth() + 1).padStart(2, '0')}-${String(vd.getDate()).padStart(2, '0')}`;
+      const entry = last7DaysTrend.find((item) => item.date === vDateStr);
+      if (entry) {
+        entry.websiteVisitors += 1;
+        if (visit.eventType === 'BLOG_VIEW' || visit.blogSlug) {
+          entry.blogVisitors += 1;
+        }
+      }
+    });
+
+    const totalWebsiteVisitorsCount = totalVisitorRecords;
+    const totalBlogReadersCount = Math.max(totalBlogVisits, totalBlogViews);
+
     return {
-      // Landing page backward compatibility:
-      projectDeliveries: Math.max(projectDeliveries, 50),
-      inHouseExperts: Math.max(inHouseExperts, 15),
+      // Landing page backward compatibility & About Us dynamic stats:
+      projectDeliveries: projectDeliveries > 0 ? projectDeliveries : (completedOrders > 0 ? completedOrders : 400),
+      inHouseExperts: inHouseExperts > 0 ? inHouseExperts : 15,
       satisfiedClients: 99,
-      businessPartners: Math.max(businessPartners, 5),
+      businessPartners: businessPartners > 0 ? businessPartners : 40,
+
+      // Telemetry & Visitor Stats at top-level:
+      totalWebsiteVisitors: totalWebsiteVisitorsCount,
+      todayWebsiteVisitors,
+      totalBlogReaders: totalBlogReadersCount,
+      todayBlogVisitors,
+      uniqueVisitorsCount,
+      topViewedBlogs,
+      visitorTrend: last7DaysTrend,
 
       // Comprehensive Dashboard Statistics for HR PANEL:
       overview: {
@@ -459,6 +595,14 @@ export class StatsService {
         businessPartners,
         totalReviews,
 
+        // Visitor Telemetry & Readership Metrics
+        totalWebsiteVisitors: totalWebsiteVisitorsCount,
+        todayWebsiteVisitors,
+        totalBlogReaders: totalBlogReadersCount,
+        todayBlogVisitors,
+        uniqueVisitorsCount,
+        topViewedBlogs,
+
         // Profit Pools Breakdown
         pools: {
           companyCost: {
@@ -486,6 +630,7 @@ export class StatsService {
         revenueTrend: chartTrend,
         orderStatusDistribution: finalOrderStatusData,
         profitDistribution,
+        visitorTrend: last7DaysTrend,
       },
 
       recentOrders,
