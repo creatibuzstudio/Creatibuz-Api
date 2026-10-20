@@ -11,6 +11,7 @@ import { CompanyExpense } from '../finance/entities/company-expense.entity';
 import { FinancialSetting } from '../finance/entities/financial-setting.entity';
 import { Blog } from '../blog/entities/blog.entity';
 import { Review } from '../review/entities/review.entity';
+import { WebsiteVisitor } from './entities/visitor.entity';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { Review } from '../review/entities/review.entity';
       FinancialSetting,
       Blog,
       Review,
+      WebsiteVisitor,
     ]),
   ],
   controllers: [StatsController],

@@ -47,6 +47,9 @@ export class Blog {
   @Column({ type: 'text', nullable: true })
   metaKeywords: string;
 
+  @Column({ type: 'int', default: 0 })
+  views: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

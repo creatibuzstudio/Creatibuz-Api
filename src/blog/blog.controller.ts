@@ -22,6 +22,16 @@ export class BlogController {
     return this.blogService.findBySlug(slug);
   }
 
+  @Post('slug/:slug/view')
+  incrementViewsBySlug(@Param('slug') slug: string) {
+    return this.blogService.incrementViews(slug);
+  }
+
+  @Post(':id/view')
+  incrementViewsById(@Param('id') id: string) {
+    return this.blogService.incrementViews(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.blogService.findOne(id);

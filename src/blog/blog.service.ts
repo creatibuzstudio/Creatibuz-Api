@@ -87,7 +87,16 @@ export class BlogService {
     if (!blog) {
       throw new NotFoundException(`Blog with slug '${slug}' not found`);
     }
+    // Increment view count when a visitor reads the blog
+    blog.views = (Number(blog.views) || 0) + 1;
+    await this.blogRepository.save(blog);
     return blog;
+  }
+
+  async incrementViews(idOrSlug: string): Promise<Blog> {
+    const blog = await this.findOne(idOrSlug);
+    blog.views = (Number(blog.views) || 0) + 1;
+    return await this.blogRepository.save(blog);
   }
 
   async findOne(idOrSlug: string): Promise<Blog> {
