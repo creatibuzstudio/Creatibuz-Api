@@ -179,6 +179,79 @@ export class ContactService {
     });
   }
 
+  async findOne(id: string) {
+    const contact = await this.contactRepository.findOne({ where: { id } });
+    if (!contact) {
+      throw new NotFoundException(`Contact #${id} not found`);
+    }
+    return contact;
+  }
+
+  async sendFollowUpEmail(dto: {
+    contactId?: string;
+    to: string;
+    subject: string;
+    message: string;
+    senderName?: string;
+  }) {
+    if (!dto.to || !dto.message) {
+      throw new NotFoundException('Recipient email and message body are required.');
+    }
+
+    const fromAddress =
+      process.env.MAIL_FROM ||
+      `"${dto.senderName || 'Creatibuz Studio'}" <${process.env.MAIL_USER || 'info@creatibuz.com'}>`;
+
+    const htmlContent = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 620px; margin: 0 auto; background-color: #ffffff; color: #1f2937; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
+        <div style="background: linear-gradient(135deg, #FE5A00 0%, #FF8C42 100%); padding: 24px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">Creatibuz Studio</h1>
+          <p style="color: rgba(255,255,255,0.92); margin: 4px 0 0 0; font-size: 13px;">Design &bull; Development &bull; AI Solutions</p>
+        </div>
+        
+        <div style="padding: 28px 24px; line-height: 1.7; font-size: 15px; color: #374151;">
+          ${dto.message}
+        </div>
+
+        <div style="background-color: #f9fafb; padding: 18px 24px; border-top: 1px solid #e5e7eb; font-size: 13px; color: #6b7280; text-align: center;">
+          <p style="margin: 0 0 4px 0; font-weight: 600; color: #374151;">Creatibuz Studio</p>
+          <p style="margin: 0 0 6px 0;">Email: <a href="mailto:info@creatibuz.com" style="color: #fe5a00; text-decoration: none;">info@creatibuz.com</a> &bull; WhatsApp: <a href="https://wa.me/+8801968657353" style="color: #25d366; text-decoration: none;">+880 1968 657353</a></p>
+          <p style="margin: 0; font-size: 12px; color: #9ca3af;"><a href="https://creatibuzstudio.com" style="color: #fe5a00; text-decoration: none;">creatibuzstudio.com</a></p>
+        </div>
+      </div>
+    `;
+
+    const mailOptions = {
+      from: fromAddress,
+      to: dto.to,
+      replyTo: 'info@creatibuz.com',
+      subject: dto.subject || 'Follow-up regarding your inquiry with Creatibuz Studio',
+      html: htmlContent,
+    };
+
+    const info = await this.transporter.sendMail(mailOptions);
+    this.logger.log(`Follow-up email successfully sent to ${dto.to} (MessageId: ${info?.messageId})`);
+
+    // If contactId is provided, update contact status to REPLIED
+    if (dto.contactId) {
+      try {
+        const contact = await this.contactRepository.findOne({ where: { id: dto.contactId } });
+        if (contact) {
+          contact.status = 'REPLIED';
+          await this.contactRepository.save(contact);
+        }
+      } catch (err) {
+        this.logger.warn(`Could not update contact status to REPLIED: ${err?.message}`);
+      }
+    }
+
+    return {
+      success: true,
+      message: `Follow-up email successfully sent to ${dto.to}`,
+      messageId: info?.messageId,
+    };
+  }
+
   async remove(id: string) {
     const result = await this.contactRepository.delete(id);
     if (result.affected === 0) {

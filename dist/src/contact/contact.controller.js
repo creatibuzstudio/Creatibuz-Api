@@ -26,6 +26,12 @@ let ContactController = class ContactController {
     findAll() {
         return this.contactService.findAll();
     }
+    findOne(id) {
+        return this.contactService.findOne(id);
+    }
+    sendFollowUp(body) {
+        return this.contactService.sendFollowUpEmail(body);
+    }
     remove(id) {
         return this.contactService.remove(id);
     }
@@ -44,6 +50,20 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ContactController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ContactController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Post)('send-followup'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ContactController.prototype, "sendFollowUp", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),

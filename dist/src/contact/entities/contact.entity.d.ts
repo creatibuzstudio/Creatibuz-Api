@@ -5,5 +5,6 @@ export declare class Contact {
     whatsapp: string;
     productDetails: string;
     budget: string;
+    status: string;
     createdAt: Date;
 }

@@ -16,6 +16,25 @@ export class ContactController {
     return this.contactService.findAll();
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.contactService.findOne(id);
+  }
+
+  @Post('send-followup')
+  sendFollowUp(
+    @Body()
+    body: {
+      contactId?: string;
+      to: string;
+      subject: string;
+      message: string;
+      senderName?: string;
+    },
+  ) {
+    return this.contactService.sendFollowUpEmail(body);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.contactService.remove(id);

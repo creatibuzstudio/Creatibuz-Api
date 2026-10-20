@@ -20,6 +20,9 @@ export class Contact {
   @Column()
   budget: string;
 
+  @Column({ default: 'PENDING', nullable: true })
+  status: string;
+
   @CreateDateColumn()
   createdAt: Date;
 }

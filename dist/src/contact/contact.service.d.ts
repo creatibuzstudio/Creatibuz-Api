@@ -10,6 +10,18 @@ export declare class ContactService {
     private sendNotificationEmail;
     private sendClientAcknowledgmentEmail;
     findAll(): Promise<Contact[]>;
+    findOne(id: string): Promise<Contact>;
+    sendFollowUpEmail(dto: {
+        contactId?: string;
+        to: string;
+        subject: string;
+        message: string;
+        senderName?: string;
+    }): Promise<{
+        success: boolean;
+        message: string;
+        messageId: any;
+    }>;
     remove(id: string): Promise<{
         success: boolean;
     }>;

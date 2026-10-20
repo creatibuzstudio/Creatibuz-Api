@@ -39,6 +39,10 @@ __decorate([
     __metadata("design:type", String)
 ], Contact.prototype, "budget", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: 'PENDING', nullable: true }),
+    __metadata("design:type", String)
+], Contact.prototype, "status", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], Contact.prototype, "createdAt", void 0);
