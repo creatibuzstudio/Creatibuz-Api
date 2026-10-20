@@ -2,6 +2,7 @@ import { Department } from '../../department/entities/department.entity';
 import { Designation } from '../../designation/entities/designation.entity';
 export declare enum UserRole {
     ADMIN = "admin",
+    USER = "user",
     EMPLOYEE = "employee",
     CTO = "cto",
     CEO = "ceo",

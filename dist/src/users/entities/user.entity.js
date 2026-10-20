@@ -16,6 +16,7 @@ const designation_entity_1 = require("../../designation/entities/designation.ent
 var UserRole;
 (function (UserRole) {
     UserRole["ADMIN"] = "admin";
+    UserRole["USER"] = "user";
     UserRole["EMPLOYEE"] = "employee";
     UserRole["CTO"] = "cto";
     UserRole["CEO"] = "ceo";
