@@ -5,4 +5,5 @@ export declare class CreatePackageBookingDto {
     companyEmail: string;
     billingCycle: string;
     packageId: string;
+    status?: string;
 }

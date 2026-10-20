@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { json, urlencoded } from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
 
   // Increase payload limit for webcam base64 snapshots
   app.use(json({ limit: '50mb' }));

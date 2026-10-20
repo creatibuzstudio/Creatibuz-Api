@@ -44,4 +44,9 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePackageBookingDto.prototype, "packageId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePackageBookingDto.prototype, "status", void 0);
 //# sourceMappingURL=create-package-booking.dto.js.map

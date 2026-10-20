@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PackageBooking = void 0;
 const typeorm_1 = require("typeorm");
+const package_entity_1 = require("../../package/entities/package.entity");
 let PackageBooking = class PackageBooking {
 };
 exports.PackageBooking = PackageBooking;
@@ -42,6 +43,11 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'uuid' }),
     __metadata("design:type", String)
 ], PackageBooking.prototype, "packageId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => package_entity_1.Package, { nullable: true, createForeignKeyConstraints: false, eager: true }),
+    (0, typeorm_1.JoinColumn)({ name: 'packageId' }),
+    __metadata("design:type", package_entity_1.Package)
+], PackageBooking.prototype, "package", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 50, default: 'PENDING' }),
     __metadata("design:type", String)

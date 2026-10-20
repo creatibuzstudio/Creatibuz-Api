@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Package } from '../../package/entities/package.entity';
 
 @Entity('package_bookings')
 export class PackageBooking {
@@ -22,6 +23,10 @@ export class PackageBooking {
 
   @Column({ type: 'uuid' })
   packageId: string;
+
+  @ManyToOne(() => Package, { nullable: true, createForeignKeyConstraints: false, eager: true })
+  @JoinColumn({ name: 'packageId' })
+  package?: Package;
 
   @Column({ type: 'varchar', length: 50, default: 'PENDING' })
   status: string;

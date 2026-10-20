@@ -57,13 +57,15 @@ let PackageBookingService = class PackageBookingService {
     constructor(bookingRepository, userRepository) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
+        const port = Number(process.env.MAIL_PORT) || 465;
+        const isSecure = process.env.MAIL_SECURE ? process.env.MAIL_SECURE === 'true' : port === 465;
         this.transporter = nodemailer.createTransport({
-            host: process.env.MAIL_HOST || 'smtp.gmail.com',
-            port: Number(process.env.MAIL_PORT) || 587,
-            secure: process.env.MAIL_SECURE === 'true',
+            host: process.env.MAIL_HOST || 'smtp.hostinger.com',
+            port: port,
+            secure: isSecure,
             auth: {
-                user: process.env.MAIL_USER || 'your-email@gmail.com',
-                pass: process.env.MAIL_PASS || 'your-app-password',
+                user: process.env.MAIL_USER || 'info@creatibuz.com',
+                pass: process.env.MAIL_PASS || 'Hakim@creatibuz26',
             },
         });
     }
@@ -89,11 +91,12 @@ let PackageBookingService = class PackageBookingService {
         return savedBooking;
     }
     async sendEmailNotification(booking, generatedPassword) {
-        const superAdminEmail = process.env.SUPERADMIN_EMAIL || 'superadmin@example.com';
+        const superAdminEmail = process.env.SUPERADMIN_EMAIL || process.env.MAIL_USER || 'info@creatibuz.com';
+        const fromAddress = process.env.MAIL_FROM || `"Creatibuz Studio" <${process.env.MAIL_USER || 'info@creatibuz.com'}>`;
         const mailOptions = {
-            from: `"JEVXO System" <${process.env.MAIL_USER || 'no-reply@jevxo.com'}>`,
+            from: fromAddress,
             to: superAdminEmail,
-            subject: `New Package Booking Request: ${booking.packageId}`,
+            subject: `New Package Booking Request from ${booking.name}`,
             html: `
         <h2>New Package Booking Request</h2>
         <p>A new booking request has been submitted by <strong>${booking.name}</strong>.</p>
@@ -144,11 +147,15 @@ let PackageBookingService = class PackageBookingService {
     }
     async findAll() {
         return await this.bookingRepository.find({
+            relations: { package: true },
             order: { createdAt: 'DESC' },
         });
     }
     async findOne(id) {
-        const booking = await this.bookingRepository.findOne({ where: { id } });
+        const booking = await this.bookingRepository.findOne({
+            where: { id },
+            relations: { package: true },
+        });
         if (!booking) {
             throw new common_1.NotFoundException(`Booking with ID ${id} not found`);
         }
