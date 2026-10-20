@@ -41,15 +41,67 @@ let ActivityLogInterceptor = class ActivityLogInterceptor {
         try {
             const url = req.originalUrl || req.url || '';
             const method = req.method;
-            const user = req.user || {};
             const body = req.body || {};
+            let user = req.user || {};
+            if (!user.id && !user.userId && !user.name) {
+                const authHeader = req.headers?.authorization || req.headers?.Authorization;
+                if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+                    const token = authHeader.slice(7).trim();
+                    try {
+                        const parts = token.split('.');
+                        if (parts.length === 3) {
+                            const decoded = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+                            user = {
+                                id: decoded.sub || decoded.id || decoded.userId,
+                                userId: decoded.sub || decoded.userId || decoded.id,
+                                email: decoded.email,
+                                role: decoded.role,
+                                name: decoded.name,
+                            };
+                        }
+                    }
+                    catch {
+                    }
+                }
+            }
+            if (url.includes('/auth/login') && responseData) {
+                const authUser = responseData.user || responseData.data;
+                if (authUser) {
+                    user = {
+                        id: authUser.id || user.id,
+                        userId: authUser.id || user.userId,
+                        email: authUser.email || user.email || body.email,
+                        role: authUser.role || user.role,
+                        name: authUser.name || user.name,
+                        picture: authUser.picture || user.picture,
+                    };
+                }
+            }
+            let resolvedUser = { ...user };
+            const lookupId = user.id || user.userId;
+            if (lookupId || user.email) {
+                const dbUser = lookupId
+                    ? await this.logsService.getUserById(lookupId)
+                    : await this.logsService.getUserByEmail(user.email);
+                if (dbUser) {
+                    resolvedUser = {
+                        ...resolvedUser,
+                        id: dbUser.id,
+                        userId: dbUser.id,
+                        name: dbUser.name || resolvedUser.name || dbUser.email?.split('@')[0],
+                        email: dbUser.email || resolvedUser.email,
+                        role: dbUser.role || resolvedUser.role,
+                        picture: dbUser.picture || resolvedUser.picture,
+                    };
+                }
+            }
             let module = activity_log_entity_1.ActivityModule.SYSTEM;
             let action = activity_log_entity_1.ActivityAction.UPDATE;
             let description = `${method} request executed on ${url}`;
             if (url.includes('/auth/login')) {
                 module = activity_log_entity_1.ActivityModule.AUTH;
                 action = activity_log_entity_1.ActivityAction.LOGIN;
-                const email = body.email || user.email || 'User';
+                const email = resolvedUser.email || body.email || 'User';
                 description = `User ${email} authenticated into system dashboard`;
             }
             else if (url.includes('/payroll/disburse')) {
@@ -94,7 +146,7 @@ let ActivityLogInterceptor = class ActivityLogInterceptor {
                 }
                 else {
                     action = activity_log_entity_1.ActivityAction.UPDATE;
-                    description = `Updated user settings/profile for ${body.name || user.email || 'Team Member'}`;
+                    description = `Updated user settings/profile for ${body.name || resolvedUser.email || 'Team Member'}`;
                 }
             }
             else if (url.includes('/orders')) {
@@ -122,21 +174,53 @@ let ActivityLogInterceptor = class ActivityLogInterceptor {
                 action = method === 'POST' ? activity_log_entity_1.ActivityAction.CREATE : (method === 'DELETE' ? activity_log_entity_1.ActivityAction.DELETE : activity_log_entity_1.ActivityAction.UPDATE);
                 description = `${action} case study showcase (${body.title || 'Case Study'})`;
             }
+            else if (url.includes('/package-booking')) {
+                module = activity_log_entity_1.ActivityModule.PACKAGES;
+                if (method === 'POST') {
+                    action = activity_log_entity_1.ActivityAction.CREATE;
+                    description = `Client package booking request submitted by ${body.name || body.companyName || 'Client'}`;
+                }
+                else if (method === 'DELETE') {
+                    action = activity_log_entity_1.ActivityAction.DELETE;
+                    description = `Deleted package booking record`;
+                }
+                else {
+                    action = activity_log_entity_1.ActivityAction.UPDATE;
+                    description = `Updated package booking status`;
+                }
+            }
             else if (url.includes('/package')) {
                 module = activity_log_entity_1.ActivityModule.PACKAGES;
-                action = method === 'POST' ? activity_log_entity_1.ActivityAction.CREATE : activity_log_entity_1.ActivityAction.UPDATE;
-                description = `${action} service package tier`;
+                action = method === 'POST' ? activity_log_entity_1.ActivityAction.CREATE : (method === 'DELETE' ? activity_log_entity_1.ActivityAction.DELETE : activity_log_entity_1.ActivityAction.UPDATE);
+                description = `${action} service package tier (${body.name || 'Package'})`;
+            }
+            else if (url.includes('/contact')) {
+                module = activity_log_entity_1.ActivityModule.SYSTEM;
+                action = method === 'POST' ? activity_log_entity_1.ActivityAction.CREATE : (method === 'DELETE' ? activity_log_entity_1.ActivityAction.DELETE : activity_log_entity_1.ActivityAction.UPDATE);
+                description = `${action} contact inquiry from ${body.fullName || body.name || 'Visitor'}`;
             }
             const clientIp = req.headers?.['x-forwarded-for'] ||
                 req.socket?.remoteAddress ||
                 '127.0.0.1';
             const userAgent = req.headers?.['user-agent'] || 'Web Browser';
-            const userName = user.name || body.requestedByName || user.email?.split('@')[0] || 'System Administrator';
+            let userName = resolvedUser.name || body.requestedByName || resolvedUser.email?.split('@')[0];
+            if (!userName) {
+                if (url.includes('/contact')) {
+                    userName = body.fullName || body.name || 'Website Contact Lead';
+                }
+                else if (url.includes('/package-booking')) {
+                    userName = body.name || body.companyName || 'Package Client Lead';
+                }
+                else {
+                    userName = 'System Administrator';
+                }
+            }
             await this.logsService.create({
-                userId: user.id || user.userId || null,
+                userId: resolvedUser.id || resolvedUser.userId || null,
                 userName,
-                userEmail: user.email || body.email || null,
-                userRole: user.role || 'admin',
+                userEmail: resolvedUser.email || body.email || null,
+                userRole: resolvedUser.role || (url.includes('/contact') || url.includes('/package-booking') ? 'client' : 'admin'),
+                userPicture: resolvedUser.picture || null,
                 action,
                 module,
                 description,

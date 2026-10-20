@@ -10,6 +10,9 @@ export declare class ActivityLogsService implements OnModuleInit {
     private readonly logger;
     constructor(logRepo: Repository<ActivityLog>, userRepo: Repository<User>);
     onModuleInit(): Promise<void>;
+    getUserById(id: string): Promise<User | null>;
+    getUserByEmail(email: string): Promise<User | null>;
+    fixExistingSystemAdministratorLogs(): Promise<void>;
     create(dto: CreateActivityLogDto): Promise<ActivityLog>;
     findAll(query: QueryActivityLogDto): Promise<{
         logs: ActivityLog[];

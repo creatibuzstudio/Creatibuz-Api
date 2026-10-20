@@ -20,18 +20,97 @@ export class ActivityLogsService implements OnModuleInit {
   async onModuleInit() {
     try {
       await this.seedInitialLogsIfEmpty();
+      await this.fixExistingSystemAdministratorLogs();
     } catch (err) {
       this.logger.warn(`Initial activity log check/seed: ${err.message}`);
     }
   }
 
+  async getUserById(id: string): Promise<User | null> {
+    try {
+      if (!id) return null;
+      return await this.userRepo.findOne({ where: { id } });
+    } catch {
+      return null;
+    }
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    try {
+      if (!email) return null;
+      return await this.userRepo.findOne({ where: { email } });
+    } catch {
+      return null;
+    }
+  }
+
+  async fixExistingSystemAdministratorLogs() {
+    try {
+      const logsToFix = await this.logRepo.find({
+        where: [
+          { userName: 'System Administrator' },
+          { userName: 'System User' },
+        ],
+        take: 300,
+      });
+
+      for (const log of logsToFix) {
+        let dbUser: User | null = null;
+        if (log.userId) {
+          dbUser = await this.getUserById(log.userId);
+        } else if (log.userEmail) {
+          dbUser = await this.getUserByEmail(log.userEmail);
+        }
+
+        if (dbUser) {
+          log.userName = dbUser.name || dbUser.email?.split('@')[0];
+          log.userRole = dbUser.role || log.userRole;
+          log.userPicture = dbUser.picture || log.userPicture;
+          await this.logRepo.save(log);
+        }
+      }
+    } catch (err) {
+      this.logger.warn(`Could not fix existing admin logs: ${err.message}`);
+    }
+  }
+
   async create(dto: CreateActivityLogDto): Promise<ActivityLog> {
+    let userName = dto.userName;
+    let userEmail = dto.userEmail;
+    let userRole = dto.userRole;
+    let userPicture = dto.userPicture;
+    let userId = dto.userId;
+
+    // If userName is generic/missing, look up user from database
+    if (
+      !userName ||
+      userName === 'System Administrator' ||
+      userName === 'System User' ||
+      userName === 'Admin'
+    ) {
+      let dbUser: User | null = null;
+      if (userId) {
+        dbUser = await this.getUserById(userId);
+      }
+      if (!dbUser && userEmail) {
+        dbUser = await this.getUserByEmail(userEmail);
+      }
+
+      if (dbUser) {
+        userName = dbUser.name || dbUser.email?.split('@')[0] || userName;
+        userEmail = dbUser.email || userEmail;
+        userRole = dbUser.role || userRole;
+        userPicture = dbUser.picture || userPicture;
+        userId = dbUser.id || userId;
+      }
+    }
+
     const log = this.logRepo.create({
-      userId: dto.userId || null,
-      userName: dto.userName || 'System User',
-      userEmail: dto.userEmail || null,
-      userRole: dto.userRole || 'admin',
-      userPicture: dto.userPicture || null,
+      userId: userId || null,
+      userName: userName || 'System Administrator',
+      userEmail: userEmail || null,
+      userRole: userRole || 'admin',
+      userPicture: userPicture || null,
       action: dto.action.toUpperCase(),
       module: dto.module.toUpperCase(),
       description: dto.description,
