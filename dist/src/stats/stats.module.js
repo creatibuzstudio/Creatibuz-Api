@@ -21,6 +21,7 @@ const financial_setting_entity_1 = require("../finance/entities/financial-settin
 const blog_entity_1 = require("../blog/entities/blog.entity");
 const review_entity_1 = require("../review/entities/review.entity");
 const visitor_entity_1 = require("./entities/visitor.entity");
+const about_stats_entity_1 = require("./entities/about-stats.entity");
 let StatsModule = class StatsModule {
 };
 exports.StatsModule = StatsModule;
@@ -38,6 +39,7 @@ exports.StatsModule = StatsModule = __decorate([
                 blog_entity_1.Blog,
                 review_entity_1.Review,
                 visitor_entity_1.WebsiteVisitor,
+                about_stats_entity_1.AboutStatsSetting,
             ]),
         ],
         controllers: [stats_controller_1.StatsController],

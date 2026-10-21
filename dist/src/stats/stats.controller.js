@@ -28,6 +28,15 @@ let StatsController = class StatsController {
     getOverviewStats() {
         return this.statsService.getStats();
     }
+    getAboutStats() {
+        return this.statsService.getAboutStats();
+    }
+    updateAboutStats(body) {
+        return this.statsService.updateAboutStats(body);
+    }
+    putAboutStats(body) {
+        return this.statsService.updateAboutStats(body);
+    }
     trackVisit(req, body) {
         const ipAddress = req.headers?.['x-forwarded-for'] ||
             req.socket?.remoteAddress ||
@@ -61,6 +70,26 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], StatsController.prototype, "getOverviewStats", null);
+__decorate([
+    (0, common_1.Get)('about'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], StatsController.prototype, "getAboutStats", null);
+__decorate([
+    (0, common_1.Patch)('about'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], StatsController.prototype, "updateAboutStats", null);
+__decorate([
+    (0, common_1.Put)('about'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], StatsController.prototype, "putAboutStats", null);
 __decorate([
     (0, common_1.Post)('track-visit'),
     __param(0, (0, common_1.Req)()),

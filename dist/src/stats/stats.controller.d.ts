@@ -7,6 +7,12 @@ export declare class StatsController {
         inHouseExperts: number;
         satisfiedClients: number;
         businessPartners: number;
+        aboutStats: {
+            projectDeliveries: number;
+            inHouseExperts: number;
+            satisfiedClients: number;
+            businessPartners: number;
+        };
         totalWebsiteVisitors: number;
         todayWebsiteVisitors: number;
         totalBlogReaders: number;
@@ -148,6 +154,12 @@ export declare class StatsController {
         inHouseExperts: number;
         satisfiedClients: number;
         businessPartners: number;
+        aboutStats: {
+            projectDeliveries: number;
+            inHouseExperts: number;
+            satisfiedClients: number;
+            businessPartners: number;
+        };
         totalWebsiteVisitors: number;
         todayWebsiteVisitors: number;
         totalBlogReaders: number;
@@ -289,6 +301,12 @@ export declare class StatsController {
         inHouseExperts: number;
         satisfiedClients: number;
         businessPartners: number;
+        aboutStats: {
+            projectDeliveries: number;
+            inHouseExperts: number;
+            satisfiedClients: number;
+            businessPartners: number;
+        };
         totalWebsiteVisitors: number;
         todayWebsiteVisitors: number;
         totalBlogReaders: number;
@@ -424,6 +442,34 @@ export declare class StatsController {
             relativeTime: string;
             isNew: boolean;
         }[];
+    }>;
+    getAboutStats(): Promise<{
+        projectDeliveries: number;
+        inHouseExperts: number;
+        satisfiedClients: number;
+        businessPartners: number;
+    }>;
+    updateAboutStats(body: {
+        projectDeliveries?: number;
+        inHouseExperts?: number;
+        satisfiedClients?: number;
+        businessPartners?: number;
+    }): Promise<{
+        projectDeliveries: number;
+        inHouseExperts: number;
+        satisfiedClients: number;
+        businessPartners: number;
+    }>;
+    putAboutStats(body: {
+        projectDeliveries?: number;
+        inHouseExperts?: number;
+        satisfiedClients?: number;
+        businessPartners?: number;
+    }): Promise<{
+        projectDeliveries: number;
+        inHouseExperts: number;
+        satisfiedClients: number;
+        businessPartners: number;
     }>;
     trackVisit(req: any, body: {
         path?: string;

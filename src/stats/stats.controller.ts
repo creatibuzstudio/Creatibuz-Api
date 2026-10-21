@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Req } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Put, Body, Req } from '@nestjs/common';
 import { StatsService } from './stats.service';
 
 @Controller('stats')
@@ -18,6 +18,37 @@ export class StatsController {
   @Get('overview')
   getOverviewStats() {
     return this.statsService.getStats();
+  }
+
+  @Get('about')
+  getAboutStats() {
+    return this.statsService.getAboutStats();
+  }
+
+  @Patch('about')
+  updateAboutStats(
+    @Body()
+    body: {
+      projectDeliveries?: number;
+      inHouseExperts?: number;
+      satisfiedClients?: number;
+      businessPartners?: number;
+    },
+  ) {
+    return this.statsService.updateAboutStats(body);
+  }
+
+  @Put('about')
+  putAboutStats(
+    @Body()
+    body: {
+      projectDeliveries?: number;
+      inHouseExperts?: number;
+      satisfiedClients?: number;
+      businessPartners?: number;
+    },
+  ) {
+    return this.statsService.updateAboutStats(body);
   }
 
   @Post('track-visit')

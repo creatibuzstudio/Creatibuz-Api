@@ -12,6 +12,7 @@ import { FinancialSetting } from '../finance/entities/financial-setting.entity';
 import { Blog } from '../blog/entities/blog.entity';
 import { Review } from '../review/entities/review.entity';
 import { WebsiteVisitor } from './entities/visitor.entity';
+import { AboutStatsSetting } from './entities/about-stats.entity';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { WebsiteVisitor } from './entities/visitor.entity';
       Blog,
       Review,
       WebsiteVisitor,
+      AboutStatsSetting,
     ]),
   ],
   controllers: [StatsController],

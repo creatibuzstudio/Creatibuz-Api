@@ -11,6 +11,7 @@ import { FinancialSetting } from '../finance/entities/financial-setting.entity';
 import { Blog } from '../blog/entities/blog.entity';
 import { Review } from '../review/entities/review.entity';
 import { WebsiteVisitor } from './entities/visitor.entity';
+import { AboutStatsSetting } from './entities/about-stats.entity';
 
 @Injectable()
 export class StatsService {
@@ -35,7 +36,63 @@ export class StatsService {
     private reviewRepository: Repository<Review>,
     @InjectRepository(WebsiteVisitor)
     private visitorRepository: Repository<WebsiteVisitor>,
+    @InjectRepository(AboutStatsSetting)
+    private aboutStatsRepository: Repository<AboutStatsSetting>,
   ) {}
+
+  async getAboutStats() {
+    let stats = await this.aboutStatsRepository.findOne({
+      order: { createdAt: 'ASC' },
+    });
+    if (!stats) {
+      const allUsers = await this.userRepository.find();
+      const inHouseExperts = allUsers.filter((u) => u.role !== UserRole.CLIENT).length;
+      stats = this.aboutStatsRepository.create({
+        projectDeliveries: 400,
+        inHouseExperts: inHouseExperts > 0 ? inHouseExperts : 15,
+        satisfiedClients: 99,
+        businessPartners: 40,
+      });
+      stats = await this.aboutStatsRepository.save(stats);
+    }
+    return {
+      projectDeliveries: Number(stats.projectDeliveries) || 400,
+      inHouseExperts: Number(stats.inHouseExperts) || 15,
+      satisfiedClients: Number(stats.satisfiedClients) || 99,
+      businessPartners: Number(stats.businessPartners) || 40,
+    };
+  }
+
+  async updateAboutStats(data: {
+    projectDeliveries?: number;
+    inHouseExperts?: number;
+    satisfiedClients?: number;
+    businessPartners?: number;
+  }) {
+    let stats = await this.aboutStatsRepository.findOne({
+      order: { createdAt: 'ASC' },
+    });
+    if (!stats) {
+      stats = this.aboutStatsRepository.create({
+        projectDeliveries: data.projectDeliveries !== undefined ? Number(data.projectDeliveries) : 400,
+        inHouseExperts: data.inHouseExperts !== undefined ? Number(data.inHouseExperts) : 15,
+        satisfiedClients: data.satisfiedClients !== undefined ? Number(data.satisfiedClients) : 99,
+        businessPartners: data.businessPartners !== undefined ? Number(data.businessPartners) : 40,
+      });
+    } else {
+      if (data.projectDeliveries !== undefined) stats.projectDeliveries = Number(data.projectDeliveries);
+      if (data.inHouseExperts !== undefined) stats.inHouseExperts = Number(data.inHouseExperts);
+      if (data.satisfiedClients !== undefined) stats.satisfiedClients = Number(data.satisfiedClients);
+      if (data.businessPartners !== undefined) stats.businessPartners = Number(data.businessPartners);
+    }
+    const saved = await this.aboutStatsRepository.save(stats);
+    return {
+      projectDeliveries: Number(saved.projectDeliveries),
+      inHouseExperts: Number(saved.inHouseExperts),
+      satisfiedClients: Number(saved.satisfiedClients),
+      businessPartners: Number(saved.businessPartners),
+    };
+  }
 
   async trackVisit(data: {
     ipAddress?: string;
@@ -547,13 +604,15 @@ export class StatsService {
 
     const totalWebsiteVisitorsCount = totalVisitorRecords;
     const totalBlogReadersCount = Math.max(totalBlogVisits, totalBlogViews);
+    const aboutStats = await this.getAboutStats();
 
     return {
       // Landing page backward compatibility & About Us dynamic stats:
-      projectDeliveries: projectDeliveries > 0 ? projectDeliveries : (completedOrders > 0 ? completedOrders : 400),
-      inHouseExperts: inHouseExperts > 0 ? inHouseExperts : 15,
-      satisfiedClients: 99,
-      businessPartners: businessPartners > 0 ? businessPartners : 40,
+      projectDeliveries: aboutStats.projectDeliveries,
+      inHouseExperts: aboutStats.inHouseExperts,
+      satisfiedClients: aboutStats.satisfiedClients,
+      businessPartners: aboutStats.businessPartners,
+      aboutStats,
 
       // Telemetry & Visitor Stats at top-level:
       totalWebsiteVisitors: totalWebsiteVisitorsCount,

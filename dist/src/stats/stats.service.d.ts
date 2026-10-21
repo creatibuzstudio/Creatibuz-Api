@@ -9,6 +9,7 @@ import { FinancialSetting } from '../finance/entities/financial-setting.entity';
 import { Blog } from '../blog/entities/blog.entity';
 import { Review } from '../review/entities/review.entity';
 import { WebsiteVisitor } from './entities/visitor.entity';
+import { AboutStatsSetting } from './entities/about-stats.entity';
 export declare class StatsService {
     private casestudyRepository;
     private userRepository;
@@ -20,7 +21,25 @@ export declare class StatsService {
     private blogRepository;
     private reviewRepository;
     private visitorRepository;
-    constructor(casestudyRepository: Repository<Casestudy>, userRepository: Repository<User>, partnerRepository: Repository<Partner>, orderRepository: Repository<Order>, capitalRepository: Repository<InvestorCapital>, expenseRepository: Repository<CompanyExpense>, settingRepository: Repository<FinancialSetting>, blogRepository: Repository<Blog>, reviewRepository: Repository<Review>, visitorRepository: Repository<WebsiteVisitor>);
+    private aboutStatsRepository;
+    constructor(casestudyRepository: Repository<Casestudy>, userRepository: Repository<User>, partnerRepository: Repository<Partner>, orderRepository: Repository<Order>, capitalRepository: Repository<InvestorCapital>, expenseRepository: Repository<CompanyExpense>, settingRepository: Repository<FinancialSetting>, blogRepository: Repository<Blog>, reviewRepository: Repository<Review>, visitorRepository: Repository<WebsiteVisitor>, aboutStatsRepository: Repository<AboutStatsSetting>);
+    getAboutStats(): Promise<{
+        projectDeliveries: number;
+        inHouseExperts: number;
+        satisfiedClients: number;
+        businessPartners: number;
+    }>;
+    updateAboutStats(data: {
+        projectDeliveries?: number;
+        inHouseExperts?: number;
+        satisfiedClients?: number;
+        businessPartners?: number;
+    }): Promise<{
+        projectDeliveries: number;
+        inHouseExperts: number;
+        satisfiedClients: number;
+        businessPartners: number;
+    }>;
     trackVisit(data: {
         ipAddress?: string;
         userAgent?: string;
@@ -39,6 +58,12 @@ export declare class StatsService {
         inHouseExperts: number;
         satisfiedClients: number;
         businessPartners: number;
+        aboutStats: {
+            projectDeliveries: number;
+            inHouseExperts: number;
+            satisfiedClients: number;
+            businessPartners: number;
+        };
         totalWebsiteVisitors: number;
         todayWebsiteVisitors: number;
         totalBlogReaders: number;

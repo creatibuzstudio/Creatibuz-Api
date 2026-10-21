@@ -26,8 +26,9 @@ const financial_setting_entity_1 = require("../finance/entities/financial-settin
 const blog_entity_1 = require("../blog/entities/blog.entity");
 const review_entity_1 = require("../review/entities/review.entity");
 const visitor_entity_1 = require("./entities/visitor.entity");
+const about_stats_entity_1 = require("./entities/about-stats.entity");
 let StatsService = class StatsService {
-    constructor(casestudyRepository, userRepository, partnerRepository, orderRepository, capitalRepository, expenseRepository, settingRepository, blogRepository, reviewRepository, visitorRepository) {
+    constructor(casestudyRepository, userRepository, partnerRepository, orderRepository, capitalRepository, expenseRepository, settingRepository, blogRepository, reviewRepository, visitorRepository, aboutStatsRepository) {
         this.casestudyRepository = casestudyRepository;
         this.userRepository = userRepository;
         this.partnerRepository = partnerRepository;
@@ -38,6 +39,59 @@ let StatsService = class StatsService {
         this.blogRepository = blogRepository;
         this.reviewRepository = reviewRepository;
         this.visitorRepository = visitorRepository;
+        this.aboutStatsRepository = aboutStatsRepository;
+    }
+    async getAboutStats() {
+        let stats = await this.aboutStatsRepository.findOne({
+            order: { createdAt: 'ASC' },
+        });
+        if (!stats) {
+            const allUsers = await this.userRepository.find();
+            const inHouseExperts = allUsers.filter((u) => u.role !== user_entity_1.UserRole.CLIENT).length;
+            stats = this.aboutStatsRepository.create({
+                projectDeliveries: 400,
+                inHouseExperts: inHouseExperts > 0 ? inHouseExperts : 15,
+                satisfiedClients: 99,
+                businessPartners: 40,
+            });
+            stats = await this.aboutStatsRepository.save(stats);
+        }
+        return {
+            projectDeliveries: Number(stats.projectDeliveries) || 400,
+            inHouseExperts: Number(stats.inHouseExperts) || 15,
+            satisfiedClients: Number(stats.satisfiedClients) || 99,
+            businessPartners: Number(stats.businessPartners) || 40,
+        };
+    }
+    async updateAboutStats(data) {
+        let stats = await this.aboutStatsRepository.findOne({
+            order: { createdAt: 'ASC' },
+        });
+        if (!stats) {
+            stats = this.aboutStatsRepository.create({
+                projectDeliveries: data.projectDeliveries !== undefined ? Number(data.projectDeliveries) : 400,
+                inHouseExperts: data.inHouseExperts !== undefined ? Number(data.inHouseExperts) : 15,
+                satisfiedClients: data.satisfiedClients !== undefined ? Number(data.satisfiedClients) : 99,
+                businessPartners: data.businessPartners !== undefined ? Number(data.businessPartners) : 40,
+            });
+        }
+        else {
+            if (data.projectDeliveries !== undefined)
+                stats.projectDeliveries = Number(data.projectDeliveries);
+            if (data.inHouseExperts !== undefined)
+                stats.inHouseExperts = Number(data.inHouseExperts);
+            if (data.satisfiedClients !== undefined)
+                stats.satisfiedClients = Number(data.satisfiedClients);
+            if (data.businessPartners !== undefined)
+                stats.businessPartners = Number(data.businessPartners);
+        }
+        const saved = await this.aboutStatsRepository.save(stats);
+        return {
+            projectDeliveries: Number(saved.projectDeliveries),
+            inHouseExperts: Number(saved.inHouseExperts),
+            satisfiedClients: Number(saved.satisfiedClients),
+            businessPartners: Number(saved.businessPartners),
+        };
     }
     async trackVisit(data) {
         try {
@@ -458,11 +512,13 @@ let StatsService = class StatsService {
         });
         const totalWebsiteVisitorsCount = totalVisitorRecords;
         const totalBlogReadersCount = Math.max(totalBlogVisits, totalBlogViews);
+        const aboutStats = await this.getAboutStats();
         return {
-            projectDeliveries: projectDeliveries > 0 ? projectDeliveries : (completedOrders > 0 ? completedOrders : 400),
-            inHouseExperts: inHouseExperts > 0 ? inHouseExperts : 15,
-            satisfiedClients: 99,
-            businessPartners: businessPartners > 0 ? businessPartners : 40,
+            projectDeliveries: aboutStats.projectDeliveries,
+            inHouseExperts: aboutStats.inHouseExperts,
+            satisfiedClients: aboutStats.satisfiedClients,
+            businessPartners: aboutStats.businessPartners,
+            aboutStats,
             totalWebsiteVisitors: totalWebsiteVisitorsCount,
             todayWebsiteVisitors,
             totalBlogReaders: totalBlogReadersCount,
@@ -546,7 +602,9 @@ exports.StatsService = StatsService = __decorate([
     __param(7, (0, typeorm_1.InjectRepository)(blog_entity_1.Blog)),
     __param(8, (0, typeorm_1.InjectRepository)(review_entity_1.Review)),
     __param(9, (0, typeorm_1.InjectRepository)(visitor_entity_1.WebsiteVisitor)),
+    __param(10, (0, typeorm_1.InjectRepository)(about_stats_entity_1.AboutStatsSetting)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
