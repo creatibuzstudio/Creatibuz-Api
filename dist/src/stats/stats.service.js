@@ -42,9 +42,11 @@ let StatsService = class StatsService {
         this.aboutStatsRepository = aboutStatsRepository;
     }
     async getAboutStats() {
-        let stats = await this.aboutStatsRepository.findOne({
+        const list = await this.aboutStatsRepository.find({
             order: { createdAt: 'ASC' },
+            take: 1,
         });
+        let stats = list[0] || null;
         if (!stats) {
             const allUsers = await this.userRepository.find();
             const inHouseExperts = allUsers.filter((u) => u.role !== user_entity_1.UserRole.CLIENT).length;
@@ -64,9 +66,11 @@ let StatsService = class StatsService {
         };
     }
     async updateAboutStats(data) {
-        let stats = await this.aboutStatsRepository.findOne({
+        const list = await this.aboutStatsRepository.find({
             order: { createdAt: 'ASC' },
+            take: 1,
         });
+        let stats = list[0] || null;
         if (!stats) {
             stats = this.aboutStatsRepository.create({
                 projectDeliveries: data.projectDeliveries !== undefined ? Number(data.projectDeliveries) : 400,
@@ -124,7 +128,7 @@ let StatsService = class StatsService {
         const totalBlogs = await this.blogRepository.count();
         const totalReviews = await this.reviewRepository.count();
         const orders = await this.orderRepository.find({
-            relations: { client: true, category: true },
+            relations: { client: true },
             order: { createdAt: 'DESC' },
         });
         let totalRevenue = 0;

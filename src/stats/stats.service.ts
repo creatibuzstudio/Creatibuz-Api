@@ -41,9 +41,11 @@ export class StatsService {
   ) {}
 
   async getAboutStats() {
-    let stats = await this.aboutStatsRepository.findOne({
+    const list = await this.aboutStatsRepository.find({
       order: { createdAt: 'ASC' },
+      take: 1,
     });
+    let stats = list[0] || null;
     if (!stats) {
       const allUsers = await this.userRepository.find();
       const inHouseExperts = allUsers.filter((u) => u.role !== UserRole.CLIENT).length;
@@ -69,9 +71,11 @@ export class StatsService {
     satisfiedClients?: number;
     businessPartners?: number;
   }) {
-    let stats = await this.aboutStatsRepository.findOne({
+    const list = await this.aboutStatsRepository.find({
       order: { createdAt: 'ASC' },
+      take: 1,
     });
+    let stats = list[0] || null;
     if (!stats) {
       stats = this.aboutStatsRepository.create({
         projectDeliveries: data.projectDeliveries !== undefined ? Number(data.projectDeliveries) : 400,
@@ -140,7 +144,7 @@ export class StatsService {
 
     // 2. Orders & Revenue Calculation
     const orders = await this.orderRepository.find({
-      relations: { client: true, category: true },
+      relations: { client: true },
       order: { createdAt: 'DESC' },
     });
 

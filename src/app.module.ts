@@ -39,7 +39,7 @@ import { TimeTrackerModule } from './time-tracker/time-tracker.module';
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: false,
         ssl: {
           rejectUnauthorized: false,
         },
