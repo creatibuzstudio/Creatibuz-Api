@@ -9,20 +9,11 @@ async function bootstrap() {
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
 
-  // ✅ Enable CORS with full options
+  // ✅ Enable CORS with dynamic headers & credentials support
   app.enableCors({
     origin: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-      'Origin',
-      'X-Requested-With',
-      'Content-Type',
-      'Accept',
-      'Authorization',
-    ],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
     credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
   });
 
   const port = process.env.PORT ?? 8000;

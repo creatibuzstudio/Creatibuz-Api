@@ -9,17 +9,8 @@ async function bootstrap() {
     app.use((0, express_1.urlencoded)({ extended: true, limit: '50mb' }));
     app.enableCors({
         origin: true,
-        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-        allowedHeaders: [
-            'Origin',
-            'X-Requested-With',
-            'Content-Type',
-            'Accept',
-            'Authorization',
-        ],
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
         credentials: true,
-        preflightContinue: false,
-        optionsSuccessStatus: 204,
     });
     const port = process.env.PORT ?? 8000;
     await app.listen(port);
