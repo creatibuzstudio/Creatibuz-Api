@@ -44,6 +44,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var PackageBookingService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PackageBookingService = void 0;
 const common_1 = require("@nestjs/common");
@@ -53,10 +54,12 @@ const nodemailer = __importStar(require("nodemailer"));
 const bcrypt = __importStar(require("bcrypt"));
 const package_booking_entity_1 = require("./entities/package-booking.entity");
 const user_entity_1 = require("../users/entities/user.entity");
-let PackageBookingService = class PackageBookingService {
+let PackageBookingService = PackageBookingService_1 = class PackageBookingService {
     constructor(bookingRepository, userRepository) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
+        this.logger = new common_1.Logger(PackageBookingService_1.name);
+        this.isColumnChecked = false;
         const port = Number(process.env.MAIL_PORT) || 465;
         const isSecure = process.env.MAIL_SECURE ? process.env.MAIL_SECURE === 'true' : port === 465;
         this.transporter = nodemailer.createTransport({
@@ -69,7 +72,25 @@ let PackageBookingService = class PackageBookingService {
             },
         });
     }
+    async onModuleInit() {
+        await this.ensureColumnExists();
+    }
+    async ensureColumnExists() {
+        if (this.isColumnChecked)
+            return;
+        try {
+            await this.bookingRepository.query(`
+        ALTER TABLE "package_bookings" ADD COLUMN IF NOT EXISTS "whatsappNumber" VARCHAR(50);
+      `);
+            this.isColumnChecked = true;
+            this.logger.log('Ensured "whatsappNumber" column exists in package_bookings table.');
+        }
+        catch (err) {
+            this.logger.warn(`Could not verify/add whatsappNumber column in package_bookings: ${err?.message}`);
+        }
+    }
     async create(createPackageBookingDto) {
+        await this.ensureColumnExists();
         const whatsappNumber = createPackageBookingDto.whatsappNumber ||
             createPackageBookingDto.whatsapp ||
             null;
@@ -195,20 +216,52 @@ let PackageBookingService = class PackageBookingService {
         await this.transporter.sendMail(mailOptions);
     }
     async findAll() {
-        return await this.bookingRepository.find({
-            relations: { package: true },
-            order: { createdAt: 'DESC' },
-        });
+        await this.ensureColumnExists();
+        try {
+            return await this.bookingRepository.find({
+                relations: { package: true },
+                order: { createdAt: 'DESC' },
+            });
+        }
+        catch (err) {
+            if (err?.code === '42703') {
+                this.isColumnChecked = false;
+                await this.ensureColumnExists();
+                return await this.bookingRepository.find({
+                    relations: { package: true },
+                    order: { createdAt: 'DESC' },
+                });
+            }
+            throw err;
+        }
     }
     async findOne(id) {
-        const booking = await this.bookingRepository.findOne({
-            where: { id },
-            relations: { package: true },
-        });
-        if (!booking) {
-            throw new common_1.NotFoundException(`Booking with ID ${id} not found`);
+        await this.ensureColumnExists();
+        try {
+            const booking = await this.bookingRepository.findOne({
+                where: { id },
+                relations: { package: true },
+            });
+            if (!booking) {
+                throw new common_1.NotFoundException(`Booking with ID ${id} not found`);
+            }
+            return booking;
         }
-        return booking;
+        catch (err) {
+            if (err?.code === '42703') {
+                this.isColumnChecked = false;
+                await this.ensureColumnExists();
+                const booking = await this.bookingRepository.findOne({
+                    where: { id },
+                    relations: { package: true },
+                });
+                if (!booking) {
+                    throw new common_1.NotFoundException(`Booking with ID ${id} not found`);
+                }
+                return booking;
+            }
+            throw err;
+        }
     }
     async update(id, updatePackageBookingDto) {
         const booking = await this.findOne(id);
@@ -341,7 +394,7 @@ let PackageBookingService = class PackageBookingService {
     }
 };
 exports.PackageBookingService = PackageBookingService;
-exports.PackageBookingService = PackageBookingService = __decorate([
+exports.PackageBookingService = PackageBookingService = PackageBookingService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(package_booking_entity_1.PackageBooking)),
     __param(1, (0, typeorm_1.InjectRepository)(user_entity_1.User)),

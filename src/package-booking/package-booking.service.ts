@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as nodemailer from 'nodemailer';
@@ -9,7 +9,9 @@ import { PackageBooking } from './entities/package-booking.entity';
 import { User, UserRole } from '../users/entities/user.entity';
 
 @Injectable()
-export class PackageBookingService {
+export class PackageBookingService implements OnModuleInit {
+  private readonly logger = new Logger(PackageBookingService.name);
+  private isColumnChecked = false;
   private transporter;
 
   constructor(
@@ -32,7 +34,25 @@ export class PackageBookingService {
     });
   }
 
+  async onModuleInit() {
+    await this.ensureColumnExists();
+  }
+
+  private async ensureColumnExists() {
+    if (this.isColumnChecked) return;
+    try {
+      await this.bookingRepository.query(`
+        ALTER TABLE "package_bookings" ADD COLUMN IF NOT EXISTS "whatsappNumber" VARCHAR(50);
+      `);
+      this.isColumnChecked = true;
+      this.logger.log('Ensured "whatsappNumber" column exists in package_bookings table.');
+    } catch (err: any) {
+      this.logger.warn(`Could not verify/add whatsappNumber column in package_bookings: ${err?.message}`);
+    }
+  }
+
   async create(createPackageBookingDto: CreatePackageBookingDto): Promise<PackageBooking> {
+    await this.ensureColumnExists();
     const whatsappNumber =
       createPackageBookingDto.whatsappNumber ||
       createPackageBookingDto.whatsapp ||
@@ -182,21 +202,51 @@ export class PackageBookingService {
   }
 
   async findAll(): Promise<PackageBooking[]> {
-    return await this.bookingRepository.find({
-      relations: { package: true },
-      order: { createdAt: 'DESC' },
-    });
+    await this.ensureColumnExists();
+    try {
+      return await this.bookingRepository.find({
+        relations: { package: true },
+        order: { createdAt: 'DESC' },
+      });
+    } catch (err: any) {
+      if (err?.code === '42703') {
+        this.isColumnChecked = false;
+        await this.ensureColumnExists();
+        return await this.bookingRepository.find({
+          relations: { package: true },
+          order: { createdAt: 'DESC' },
+        });
+      }
+      throw err;
+    }
   }
 
   async findOne(id: string): Promise<PackageBooking> {
-    const booking = await this.bookingRepository.findOne({
-      where: { id },
-      relations: { package: true },
-    });
-    if (!booking) {
-      throw new NotFoundException(`Booking with ID ${id} not found`);
+    await this.ensureColumnExists();
+    try {
+      const booking = await this.bookingRepository.findOne({
+        where: { id },
+        relations: { package: true },
+      });
+      if (!booking) {
+        throw new NotFoundException(`Booking with ID ${id} not found`);
+      }
+      return booking;
+    } catch (err: any) {
+      if (err?.code === '42703') {
+        this.isColumnChecked = false;
+        await this.ensureColumnExists();
+        const booking = await this.bookingRepository.findOne({
+          where: { id },
+          relations: { package: true },
+        });
+        if (!booking) {
+          throw new NotFoundException(`Booking with ID ${id} not found`);
+        }
+        return booking;
+      }
+      throw err;
     }
-    return booking;
   }
 
   async update(id: string, updatePackageBookingDto: UpdatePackageBookingDto): Promise<PackageBooking> {
