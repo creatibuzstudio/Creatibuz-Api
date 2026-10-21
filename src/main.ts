@@ -16,6 +16,16 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // Disable ETag generation to prevent 304 responses missing CORS headers
+  app.getHttpAdapter().getInstance().set('etag', false);
+
+  app.use((_req: any, res: any, next: any) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+  });
+
   const port = process.env.PORT ?? 8000;
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);

@@ -16,8 +16,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader(
     'Access-Control-Allow-Headers',
     reqHeaders ||
-      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization',
+      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Cache-Control, Pragma',
   );
+
+  // 🔥 PREVENT 304 NOT MODIFIED (which strips CORS headers on Vercel Edge)
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
 
   // Preflight
   if (req.method === 'OPTIONS') {

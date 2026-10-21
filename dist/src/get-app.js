@@ -7,9 +7,16 @@ let cachedApp;
 async function getApp() {
     if (!cachedApp) {
         const app = await core_1.NestFactory.create(app_module_1.AppModule);
+        app.set('etag', false);
         app.enableCors({
             origin: true,
             credentials: true,
+        });
+        app.use((_req, res, next) => {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+            next();
         });
         await app.init();
         cachedApp = app;
