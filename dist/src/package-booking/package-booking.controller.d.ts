@@ -25,6 +25,22 @@ export declare class PackageBookingController {
         message: string;
         data: import("./entities/package-booking.entity").PackageBooking;
     }>;
+    sendReply(body: {
+        bookingId?: string;
+        to: string;
+        subject: string;
+        message: string;
+        senderName?: string;
+        newStatus?: string;
+    }): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+        data: {
+            success: boolean;
+            message: string;
+            messageId: any;
+        };
+    }>;
     remove(id: string): Promise<{
         statusCode: HttpStatus;
         message: string;

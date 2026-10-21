@@ -27,5 +27,13 @@ export class CreatePackageBookingDto {
 
   @IsOptional()
   @IsString()
+  whatsappNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  whatsapp?: string;
+
+  @IsOptional()
+  @IsString()
   status?: string;
 }

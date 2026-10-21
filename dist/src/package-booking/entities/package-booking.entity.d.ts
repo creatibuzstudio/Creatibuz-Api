@@ -6,6 +6,7 @@ export declare class PackageBooking {
     companyName: string;
     companyEmail: string;
     billingCycle: string;
+    whatsappNumber?: string;
     packageId: string;
     package?: Package;
     status: string;

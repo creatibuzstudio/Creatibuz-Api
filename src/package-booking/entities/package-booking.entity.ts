@@ -21,6 +21,9 @@ export class PackageBooking {
   @Column({ type: 'varchar', length: 100 })
   billingCycle: string;
 
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  whatsappNumber?: string;
+
   @Column({ type: 'uuid' })
   packageId: string;
 

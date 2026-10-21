@@ -5,5 +5,7 @@ export declare class CreatePackageBookingDto {
     companyEmail: string;
     billingCycle: string;
     packageId: string;
+    whatsappNumber?: string;
+    whatsapp?: string;
     status?: string;
 }

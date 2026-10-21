@@ -47,6 +47,26 @@ export class PackageBookingController {
     };
   }
 
+  @Post('send-reply')
+  async sendReply(
+    @Body()
+    body: {
+      bookingId?: string;
+      to: string;
+      subject: string;
+      message: string;
+      senderName?: string;
+      newStatus?: string;
+    },
+  ) {
+    const result = await this.packageBookingService.sendReplyEmail(body);
+    return {
+      statusCode: HttpStatus.OK,
+      message: result.message,
+      data: result,
+    };
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string) {
     await this.packageBookingService.remove(id);

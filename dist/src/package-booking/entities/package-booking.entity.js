@@ -40,6 +40,10 @@ __decorate([
     __metadata("design:type", String)
 ], PackageBooking.prototype, "billingCycle", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 50, nullable: true }),
+    __metadata("design:type", String)
+], PackageBooking.prototype, "whatsappNumber", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'uuid' }),
     __metadata("design:type", String)
 ], PackageBooking.prototype, "packageId", void 0);

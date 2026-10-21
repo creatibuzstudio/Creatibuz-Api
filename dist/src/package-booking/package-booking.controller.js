@@ -53,6 +53,14 @@ let PackageBookingController = class PackageBookingController {
             data,
         };
     }
+    async sendReply(body) {
+        const result = await this.packageBookingService.sendReplyEmail(body);
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: result.message,
+            data: result,
+        };
+    }
     async remove(id) {
         await this.packageBookingService.remove(id);
         return {
@@ -91,6 +99,13 @@ __decorate([
     __metadata("design:paramtypes", [String, update_package_booking_dto_1.UpdatePackageBookingDto]),
     __metadata("design:returntype", Promise)
 ], PackageBookingController.prototype, "update", null);
+__decorate([
+    (0, common_1.Post)('send-reply'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PackageBookingController.prototype, "sendReply", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
