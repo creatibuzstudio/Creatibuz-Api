@@ -11,34 +11,85 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var PackageCategoryService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PackageCategoryService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const package_category_entity_1 = require("./entities/package-category.entity");
-let PackageCategoryService = class PackageCategoryService {
+let PackageCategoryService = PackageCategoryService_1 = class PackageCategoryService {
     constructor(packageCategoryRepository) {
         this.packageCategoryRepository = packageCategoryRepository;
+        this.logger = new common_1.Logger(PackageCategoryService_1.name);
+        this.isColumnChecked = false;
     }
-    create(createPackageCategoryDto) {
+    async onModuleInit() {
+        await this.ensureTitleColumn();
+    }
+    async ensureTitleColumn() {
+        if (this.isColumnChecked)
+            return;
+        try {
+            await this.packageCategoryRepository.query(`
+        ALTER TABLE "packages" ADD COLUMN IF NOT EXISTS "title" VARCHAR(150);
+      `);
+            this.isColumnChecked = true;
+            this.logger.log('Ensured "title" column exists in packages table.');
+        }
+        catch (err) {
+            this.logger.warn(`Could not verify/add title column in packages: ${err?.message}`);
+        }
+    }
+    async create(createPackageCategoryDto) {
         const category = this.packageCategoryRepository.create(createPackageCategoryDto);
         return this.packageCategoryRepository.save(category);
     }
-    findAll() {
-        return this.packageCategoryRepository.find({
-            relations: { packages: true },
-        });
+    async findAll() {
+        await this.ensureTitleColumn();
+        try {
+            return await this.packageCategoryRepository.find({
+                relations: { packages: true },
+            });
+        }
+        catch (err) {
+            if (err?.code === '42703') {
+                this.isColumnChecked = false;
+                await this.ensureTitleColumn();
+                return await this.packageCategoryRepository.find({
+                    relations: { packages: true },
+                });
+            }
+            throw err;
+        }
     }
     async findOne(id) {
-        const category = await this.packageCategoryRepository.findOne({
-            where: { id },
-            relations: { packages: true },
-        });
-        if (!category) {
-            throw new common_1.NotFoundException(`Package Category with ID ${id} not found`);
+        await this.ensureTitleColumn();
+        try {
+            const category = await this.packageCategoryRepository.findOne({
+                where: { id },
+                relations: { packages: true },
+            });
+            if (!category) {
+                throw new common_1.NotFoundException(`Package Category with ID ${id} not found`);
+            }
+            return category;
         }
-        return category;
+        catch (err) {
+            if (err?.code === '42703') {
+                this.isColumnChecked = false;
+                await this.ensureTitleColumn();
+                const category = await this.packageCategoryRepository.findOne({
+                    where: { id },
+                    relations: { packages: true },
+                });
+                if (!category) {
+                    throw new common_1.NotFoundException(`Package Category with ID ${id} not found`);
+                }
+                return category;
+            }
+            throw err;
+        }
     }
     async update(id, updatePackageCategoryDto) {
         const category = await this.findOne(id);
@@ -51,7 +102,7 @@ let PackageCategoryService = class PackageCategoryService {
     }
 };
 exports.PackageCategoryService = PackageCategoryService;
-exports.PackageCategoryService = PackageCategoryService = __decorate([
+exports.PackageCategoryService = PackageCategoryService = PackageCategoryService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(package_category_entity_1.PackageCategory)),
     __metadata("design:paramtypes", [typeorm_2.Repository])
