@@ -26,7 +26,9 @@ let PackageCategoryService = class PackageCategoryService {
         return this.packageCategoryRepository.save(category);
     }
     findAll() {
-        return this.packageCategoryRepository.find({ relations: { packages: true } });
+        return this.packageCategoryRepository.find({
+            relations: { packages: true },
+        });
     }
     async findOne(id) {
         const category = await this.packageCategoryRepository.findOne({

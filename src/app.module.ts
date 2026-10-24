@@ -15,6 +15,7 @@ import { CasestudiesModule } from './casestudies/casestudies.module';
 import { CategoryModule } from './category/category.module';
 import { OrdersModule } from './orders/orders.module';
 import { PackageCategoryModule } from './package-category/package-category.module';
+import { PackageTitleModule } from './package-title/package-title.module';
 import { BlogModule } from './blog/blog.module';
 import { ReviewModule } from './review/review.module';
 import { ContactModule } from './contact/contact.module';
@@ -58,6 +59,7 @@ import { TimeTrackerModule } from './time-tracker/time-tracker.module';
     CategoryModule,
     OrdersModule,
     PackageCategoryModule,
+    PackageTitleModule,
     BlogModule,
     ReviewModule,
     ContactModule,

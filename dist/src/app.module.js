@@ -24,6 +24,7 @@ const casestudies_module_1 = require("./casestudies/casestudies.module");
 const category_module_1 = require("./category/category.module");
 const orders_module_1 = require("./orders/orders.module");
 const package_category_module_1 = require("./package-category/package-category.module");
+const package_title_module_1 = require("./package-title/package-title.module");
 const blog_module_1 = require("./blog/blog.module");
 const review_module_1 = require("./review/review.module");
 const contact_module_1 = require("./contact/contact.module");
@@ -69,6 +70,7 @@ exports.AppModule = AppModule = __decorate([
             category_module_1.CategoryModule,
             orders_module_1.OrdersModule,
             package_category_module_1.PackageCategoryModule,
+            package_title_module_1.PackageTitleModule,
             blog_module_1.BlogModule,
             review_module_1.ReviewModule,
             contact_module_1.ContactModule,

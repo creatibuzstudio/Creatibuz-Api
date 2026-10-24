@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const package_service_1 = require("./package.service");
 const package_controller_1 = require("./package.controller");
 const package_entity_1 = require("./entities/package.entity");
+const package_title_entity_1 = require("../package-title/entities/package-title.entity");
 let PackageModule = class PackageModule {
 };
 exports.PackageModule = PackageModule;
 exports.PackageModule = PackageModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([package_entity_1.Package])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([package_entity_1.Package, package_title_entity_1.PackageTitle])],
         controllers: [package_controller_1.PackageController],
         providers: [package_service_1.PackageService],
     })

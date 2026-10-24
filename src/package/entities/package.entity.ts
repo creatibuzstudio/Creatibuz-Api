@@ -9,6 +9,10 @@ export class Package {
   @Column({ type: 'varchar', length: 150 })
   name: string;
 
+  @Column({ type: 'varchar', length: 150, nullable: true })
+  title: string;
+
+
   @Column({ type: 'text' })
   description: string;
 

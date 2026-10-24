@@ -2,6 +2,7 @@ import { PackageCategory } from '../../package-category/entities/package-categor
 export declare class Package {
     id: string;
     name: string;
+    title: string;
     description: string;
     price: number;
     features: string[];

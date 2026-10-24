@@ -5,6 +5,10 @@ export class CreatePackageDto {
   @IsString()
   name: string;
 
+  @IsOptional()
+  @IsString()
+  title?: string;
+
   @IsNotEmpty()
   @IsString()
   description: string;
@@ -29,4 +33,9 @@ export class CreatePackageDto {
 
   @IsOptional()
   category?: any;
+
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
 }
+

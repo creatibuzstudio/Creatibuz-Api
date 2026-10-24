@@ -10,10 +10,13 @@ export class PackageService {
   constructor(
     @InjectRepository(Package)
     private readonly packageRepository: Repository<Package>,
-  ) {}
+  ) { }
 
   async create(createPackageDto: CreatePackageDto): Promise<Package> {
     const pkg = this.packageRepository.create(createPackageDto);
+    if (createPackageDto.categoryId) {
+      pkg.category = { id: createPackageDto.categoryId } as any;
+    }
     return await this.packageRepository.save(pkg);
   }
 
@@ -25,9 +28,9 @@ export class PackageService {
   }
 
   async findOne(id: string): Promise<Package> {
-    const pkg = await this.packageRepository.findOne({ 
+    const pkg = await this.packageRepository.findOne({
       where: { id },
-      relations: { category: true } 
+      relations: { category: true }
     });
     if (!pkg) {
       throw new NotFoundException(`Package with ID ${id} not found`);
@@ -38,6 +41,9 @@ export class PackageService {
   async update(id: string, updatePackageDto: UpdatePackageDto): Promise<Package> {
     const pkg = await this.findOne(id);
     Object.assign(pkg, updatePackageDto);
+    if (updatePackageDto.categoryId) {
+      pkg.category = { id: updatePackageDto.categoryId } as any;
+    }
     return await this.packageRepository.save(pkg);
   }
 

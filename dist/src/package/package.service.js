@@ -23,6 +23,9 @@ let PackageService = class PackageService {
     }
     async create(createPackageDto) {
         const pkg = this.packageRepository.create(createPackageDto);
+        if (createPackageDto.categoryId) {
+            pkg.category = { id: createPackageDto.categoryId };
+        }
         return await this.packageRepository.save(pkg);
     }
     async findAll() {
@@ -44,6 +47,9 @@ let PackageService = class PackageService {
     async update(id, updatePackageDto) {
         const pkg = await this.findOne(id);
         Object.assign(pkg, updatePackageDto);
+        if (updatePackageDto.categoryId) {
+            pkg.category = { id: updatePackageDto.categoryId };
+        }
         return await this.packageRepository.save(pkg);
     }
     async remove(id) {

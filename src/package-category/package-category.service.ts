@@ -18,7 +18,9 @@ export class PackageCategoryService {
   }
 
   findAll() {
-    return this.packageCategoryRepository.find({ relations: { packages: true } });
+    return this.packageCategoryRepository.find({
+      relations: { packages: true },
+    });
   }
 
   async findOne(id: string) {
